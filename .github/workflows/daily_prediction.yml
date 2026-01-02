@@ -62,7 +62,9 @@ jobs:
           fi
           
           echo "📅 予測日: $DATE_ARG"
-          python daily_prediction.py --post --attractions --date "$DATE_ARG"
+          # アトラクション個別投稿はレート制限のため無効化
+          # python daily_prediction.py --post --attractions --date "$DATE_ARG"
+          python daily_prediction.py --post --date "$DATE_ARG"
 
       - name: 📁 成果物をアップロード
         uses: actions/upload-artifact@v4
