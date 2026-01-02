@@ -252,11 +252,14 @@ def generate_prediction_report(predictions, date, temperature, is_rainy, output_
 
 
 def generate_heatmap(predictions, date, output_dir="predictions"):
-    """待ち時間ヒートマップを生成"""
+    """待ち時間ヒートマップを生成（SNS映えデザイン）"""
     
     if not HAS_MATPLOTLIB:
         print("⚠️ matplotlibがないためヒートマップは生成できません")
         return
+    
+    from matplotlib.colors import LinearSegmentedColormap
+    import matplotlib.patches as mpatches
     
     os.makedirs(output_dir, exist_ok=True)
     
@@ -277,36 +280,86 @@ def generate_heatmap(predictions, date, output_dir="predictions"):
     # 平均待ち時間でソート
     pivot = pivot.loc[pivot.mean(axis=1).sort_values(ascending=False).index]
     
-    # ヒートマップ作成
-    fig, ax = plt.subplots(figsize=(20, 14))
+    # === SNS映えカスタムカラーマップ（ランド用：ピンク〜パープル系）===
+    colors_vibrant = [
+        '#2ECC71',  # 緑（空いている）
+        '#58D68D',  # 明るい緑
+        '#F7DC6F',  # 黄色
+        '#F5B041',  # オレンジ
+        '#E74C3C',  # 赤
+        '#C0392B',  # 濃い赤（激混み）
+    ]
+    custom_cmap = LinearSegmentedColormap.from_list('disney_vibrant', colors_vibrant, N=256)
+    
+    # ダークパープル背景（ランド用）
+    fig, ax = plt.subplots(figsize=(20, 14), facecolor='#1a1a2e')
+    ax.set_facecolor('#1a1a2e')
     
     if HAS_SEABORN:
+        # カスタムアノテーション設定
         sns.heatmap(
             pivot, 
             ax=ax,
-            cmap='YlOrRd',
+            cmap=custom_cmap,
             annot=True,
             fmt='.0f',
-            cbar_kws={'label': '予測待ち時間 (分)'},
-            linewidths=0.5
+            annot_kws={'fontsize': 10, 'fontweight': 'bold', 'color': 'white'},
+            cbar_kws={'label': '予測待ち時間 (分)', 'shrink': 0.8},
+            linewidths=2,
+            linecolor='#1a1a2e',
+            vmin=0,
+            vmax=180
         )
+        # カラーバーのテキスト色
+        cbar = ax.collections[0].colorbar
+        cbar.ax.yaxis.label.set_color('white')
+        cbar.ax.tick_params(colors='white')
     else:
-        im = ax.imshow(pivot.values, cmap='YlOrRd', aspect='auto')
-        plt.colorbar(im, ax=ax, label='予測待ち時間 (分)')
+        im = ax.imshow(pivot.values, cmap=custom_cmap, aspect='auto', vmin=0, vmax=180)
+        cbar = plt.colorbar(im, ax=ax, label='予測待ち時間 (分)', shrink=0.8)
+        cbar.ax.yaxis.label.set_color('white')
+        cbar.ax.tick_params(colors='white')
         ax.set_xticks(range(len(pivot.columns)))
         ax.set_xticklabels(pivot.columns, rotation=45, ha='right')
         ax.set_yticks(range(len(pivot.index)))
         ax.set_yticklabels(pivot.index)
     
     day_name = get_day_of_week_ja(date)
-    ax.set_title(f'ディズニーランド 待ち時間予測ヒートマップ\n{date} ({day_name}曜日)', fontsize=16)
-    ax.set_xlabel('時刻', fontsize=12)
-    ax.set_ylabel('アトラクション', fontsize=12)
+    
+    # タイトル（グラデーション風）
+    ax.set_title(
+        f'🏰 ディズニーランド AI待ち時間予測\n📅 {date} ({day_name}曜日)', 
+        fontsize=20, 
+        fontweight='bold',
+        color='white',
+        pad=20
+    )
+    ax.set_xlabel('⏰ 時刻', fontsize=14, color='white', fontweight='bold')
+    ax.set_ylabel('🎢 アトラクション', fontsize=14, color='white', fontweight='bold')
+    
+    # 軸ラベルの色
+    ax.tick_params(axis='x', colors='white', labelsize=11)
+    ax.tick_params(axis='y', colors='white', labelsize=10)
+    
+    # 凡例を追加
+    legend_labels = ['〜30分', '30〜60分', '60〜90分', '90〜120分', '120分〜']
+    legend_colors = ['#2ECC71', '#58D68D', '#F7DC6F', '#F5B041', '#E74C3C']
+    patches = [mpatches.Patch(color=c, label=l) for c, l in zip(legend_colors, legend_labels)]
+    legend = ax.legend(
+        handles=patches, 
+        loc='upper left', 
+        bbox_to_anchor=(1.15, 1),
+        facecolor='#2d2d44',
+        edgecolor='white',
+        fontsize=10
+    )
+    for text in legend.get_texts():
+        text.set_color('white')
     
     plt.tight_layout()
     
     heatmap_file = os.path.join(output_dir, f"prediction_heatmap_{date}.png")
-    plt.savefig(heatmap_file, dpi=150, bbox_inches='tight')
+    plt.savefig(heatmap_file, dpi=150, bbox_inches='tight', facecolor='#1a1a2e')
     plt.close()
     
     print(f"📊 ヒートマップ保存: {heatmap_file}")
