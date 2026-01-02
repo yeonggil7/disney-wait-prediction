@@ -41,10 +41,10 @@ predictions_sea/
 predictions_land/
 predictions/
 
-# モデルファイル（サイズが大きいため）
-*.pkl
-*.joblib
-models/
+# モデルファイル（Git LFSで管理）
+# *.pkl
+# *.joblib
+# models/
 
 # データファイル
 # ※Disneyland/ と Disneysea/ は学習に必要なためコミット対象
