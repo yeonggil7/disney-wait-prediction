@@ -164,7 +164,7 @@ from tdr_event_calendar import get_current_event, get_special_day, get_smart_tip
 
 def create_park_tweet(park: str, summary: dict, date: str) -> str:
     """
-    パーク別のツイートを生成（YouTube人気動画風・インプレッション重視版）
+    パーク別のツイートを生成（明日ディズニーに行く人向け・予習スタイル）
     """
     import math
     
@@ -175,10 +175,12 @@ def create_park_tweet(park: str, summary: dict, date: str) -> str:
     if park == 'sea':
         emoji = "🌊"
         park_name = "ディズニーシー"
+        short_name = "シー"
         base_hashtag = "#TDS"
     else:
         emoji = "🏰"
         park_name = "ディズニーランド"
+        short_name = "ランド"
         base_hashtag = "#TDL"
     
     # イベント情報
@@ -195,53 +197,48 @@ def create_park_tweet(park: str, summary: dict, date: str) -> str:
     tips = get_smart_tips(date, park, avg_wait)
     
     # ===== ツイート構築 =====
-    tweet = f"{emoji} {dt.month}/{dt.day}({weekday}) {park_name}\n"
+    # キャッチーな導入
+    tweet = f"📢 明日{short_name}行く人！\n"
+    tweet += f"🎓 AI予習しとこ👇\n\n"
+    
+    tweet += f"{emoji} {dt.month}/{dt.day}({weekday}) {park_name}\n"
     
     # イベント情報（初日は大々的に！）
     if event:
         if event['is_first_day']:
-            tweet += f"🎉 本日スタート！\n"
-            tweet += f"{event['emoji']} {event['name']}\n"
-            tweet += f"→ {event['highlight']}\n"
+            tweet += f"🎉 {event['name']}初日！\n"
         else:
             tweet += f"{event['emoji']} {event['name']}開催中\n"
-    
-    # 特別な日
-    if special:
-        tweet += f"{special['emoji']} {special['name']}！\n"
-        tweet += f"→ {special['comment']}\n"
     
     tweet += "━━━━━━━━━━━━━━\n"
     
     # 混雑度に応じたキャッチ
     if avg_wait >= 100:
-        tweet += "⚠️ 激混み予想！覚悟して\n\n"
+        tweet += "😱 覚悟して！激混み予想\n"
     elif avg_wait >= 70:
-        tweet += "📈 やや混雑予想\n\n"
+        tweet += "📈 そこそこ混む予想\n"
     elif avg_wait >= 40:
-        tweet += "✨ 狙い目な1日かも？\n\n"
+        tweet += "✨ 狙い目な1日！\n"
     else:
-        tweet += "🌟 穴場日の予感！\n\n"
+        tweet += "🌟 穴場日の予感！\n"
     
     # 最も混むアトラクション
     if summary and summary['top_attractions']:
         top_name, top_wait = summary['top_attractions'][0]
         top_wait_int = int(math.ceil(float(top_wait) / 10) * 10)
-        short_name = top_name[:7] if len(top_name) > 7 else top_name
-        tweet += f"🔥 {short_name} → {top_wait_int}分予想\n\n"
+        short_attr = top_name[:6] if len(top_name) > 6 else top_name
+        tweet += f"🔥 {short_attr}は{top_wait_int}分待ち\n"
     
     # スマートTip（1つだけ）
     if tips:
-        tweet += f"💡 {tips[0]}\n\n"
+        tweet += f"💡 {tips[0]}\n"
     
-    tweet += "📱 全アトラクション予想は画像↓\n\n"
+    tweet += "\n📱 時間別予想は画像で確認↓\n\n"
     
     # ハッシュタグ
-    tweet += "※AI予測\n"
+    tweet += "※AI予測/閉園時間で並べない場合あり\n"
     if event:
         tweet += f"{base_hashtag} {event['hashtag']}"
-    elif special:
-        tweet += f"{base_hashtag} #ディズニー"
     else:
         tweet += f"{base_hashtag} #ディズニー"
     
