@@ -1,0 +1,457 @@
+{
+  "attractions": [
+    {
+      "id": "beauty_and_beast",
+      "name": "美女と野獣\"魔法のものがたり\"",
+      "name_en": "Enchanted Tale of Beauty and the Beast",
+      "park": "tdl",
+      "area": "fantasyland",
+      "type": "ライド",
+      "subtype": "ダークライド",
+      "opened": "2020-09-28",
+      "duration_minutes": 8,
+      "capacity": 10,
+      "height_restriction": null,
+      "age_restriction": null,
+      "dpa_available": true,
+      "dpa_price": 2000,
+      "standby_pass": true,
+      "fastpass": false,
+      "description": "魔法のティーカップに乗って、映画「美女と野獣」の名シーンを巡る体験型アトラクション。最先端の技術でキャラクターたちが生き生きと動きます。",
+      "backstory": "映画「美女と野獣」のストーリーを追体験できるアトラクション。魔法にかけられた城の中で、ベルと野獣の物語が展開されます。",
+      "trivia": [
+        "オーディオアニマトロニクス（動くロボット）の技術は世界最高峰",
+        "乗り物のティーカップは踊るように動く",
+        "城の中には200以上の小道具が配置されている",
+        "日本オリジナルのアトラクションで海外パークにはない"
+      ],
+      "tips": [
+        "朝イチかスタンバイパスでの利用がおすすめ",
+        "写真撮影スポットは乗車前のプレショーエリア",
+        "夜はライトアップされた城も美しい"
+      ],
+      "wait_time_trend": {
+        "weekday": {"morning": 60, "afternoon": 90, "evening": 45},
+        "weekend": {"morning": 90, "afternoon": 120, "evening": 60}
+      },
+      "hidden_mickeys": [
+        {
+          "location": "待機列の本棚",
+          "hint": "本の背表紙のデザインをよく見ると...",
+          "difficulty": "medium"
+        }
+      ],
+      "photo_spots": ["城の外観", "プレショーの暖炉前"],
+      "wheelchair_accessible": true,
+      "single_rider": false
+    },
+    {
+      "id": "big_thunder_mountain",
+      "name": "ビッグサンダー・マウンテン",
+      "name_en": "Big Thunder Mountain",
+      "park": "tdl",
+      "area": "westernland",
+      "type": "ライド",
+      "subtype": "ローラーコースター",
+      "opened": "1987-07-04",
+      "duration_minutes": 4,
+      "capacity": 30,
+      "height_restriction": 102,
+      "age_restriction": null,
+      "dpa_available": true,
+      "dpa_price": 1500,
+      "standby_pass": false,
+      "fastpass": false,
+      "description": "無人の暴走列車に乗って、ゴールドラッシュ時代の廃坑を駆け抜けるスリリングなコースター。",
+      "backstory": "かつて金鉱として栄えた山。しかし、神聖な山を掘り進めたため呪いがかかり、列車が暴走するようになったという伝説があります。",
+      "trivia": [
+        "コースの全長は約1km",
+        "最高時速は約45km/h（絶叫系の中では控えめ）",
+        "山には本物の化石（レプリカ）が埋め込まれている",
+        "夜は山がライトアップされて雰囲気が変わる"
+      ],
+      "tips": [
+        "夜のライトアップ時に乗ると雰囲気抜群",
+        "左右どちらに座っても楽しめる",
+        "揺れが激しいので荷物はしっかり持つ"
+      ],
+      "wait_time_trend": {
+        "weekday": {"morning": 40, "afternoon": 60, "evening": 30},
+        "weekend": {"morning": 60, "afternoon": 90, "evening": 45}
+      },
+      "hidden_mickeys": [
+        {
+          "location": "待機列の岩肌",
+          "hint": "歯車が3つ並んでいる場所",
+          "difficulty": "easy"
+        }
+      ],
+      "photo_spots": ["乗車中の撮影ポイント（自動撮影）"],
+      "wheelchair_accessible": false,
+      "single_rider": false
+    },
+    {
+      "id": "space_mountain",
+      "name": "スペース・マウンテン",
+      "name_en": "Space Mountain",
+      "park": "tdl",
+      "area": "tomorrowland",
+      "type": "ライド",
+      "subtype": "ローラーコースター",
+      "opened": "1983-04-15",
+      "duration_minutes": 3,
+      "capacity": 24,
+      "height_restriction": 102,
+      "age_restriction": null,
+      "dpa_available": true,
+      "dpa_price": 1500,
+      "standby_pass": false,
+      "fastpass": false,
+      "description": "暗闘の宇宙空間を猛スピードで駆け抜けるスリリングなインドアコースター。",
+      "backstory": "宇宙旅行の時代、最新鋭のロケットに乗って銀河系の彼方への旅に出発します。",
+      "trivia": [
+        "暗くて速く感じるが実際の最高時速は約50km/h",
+        "コースター自体は光っていて、それが流れ星に見える",
+        "開園と同時に稼働している歴史あるアトラクション",
+        "2024年にリニューアル工事を経て再オープン"
+      ],
+      "tips": [
+        "暗いので怖さが増して感じる",
+        "酔いやすい人は注意",
+        "待ち時間が短くなる夕方以降が狙い目"
+      ],
+      "wait_time_trend": {
+        "weekday": {"morning": 50, "afternoon": 60, "evening": 30},
+        "weekend": {"morning": 70, "afternoon": 90, "evening": 45}
+      },
+      "hidden_mickeys": [
+        {
+          "location": "待機列の壁面",
+          "hint": "惑星の模型が並んでいる場所",
+          "difficulty": "hard"
+        }
+      ],
+      "photo_spots": [],
+      "wheelchair_accessible": false,
+      "single_rider": false
+    },
+    {
+      "id": "splash_mountain",
+      "name": "スプラッシュ・マウンテン",
+      "name_en": "Splash Mountain",
+      "park": "tdl",
+      "area": "critter_country",
+      "type": "ライド",
+      "subtype": "ウォーターライド",
+      "opened": "1992-10-01",
+      "duration_minutes": 10,
+      "capacity": 8,
+      "height_restriction": 90,
+      "age_restriction": null,
+      "dpa_available": true,
+      "dpa_price": 1500,
+      "standby_pass": false,
+      "fastpass": false,
+      "description": "丸太のボートに乗って滝を落下するウォーターライド。最後の急降下は角度45度、高さ16m！",
+      "backstory": "うさぎどんの故郷「笑いの国」を探す冒険。きつねどんとくまどんに追われながらの旅です。",
+      "trivia": [
+        "最後の落下は写真撮影ポイント",
+        "落下時の最高時速は約62km/h",
+        "乗車中に流れる曲「Zip-A-Dee-Doo-Dah」はアカデミー賞受賞曲",
+        "濡れ具合は座席位置によって異なる（前の方が濡れやすい）"
+      ],
+      "tips": [
+        "夏は濡れても気持ちいいが、冬は着替え必須",
+        "落下時のポーズを決めておくと写真が映える",
+        "濡れたくない場合は100円のポンチョ購入を"
+      ],
+      "wait_time_trend": {
+        "weekday": {"morning": 50, "afternoon": 70, "evening": 30},
+        "weekend": {"morning": 70, "afternoon": 100, "evening": 45}
+      },
+      "hidden_mickeys": [
+        {
+          "location": "最後の落下手前の洞窟",
+          "hint": "雲の形をよく見て",
+          "difficulty": "hard"
+        }
+      ],
+      "photo_spots": ["落下時（自動撮影）", "外から見る滝"],
+      "wheelchair_accessible": false,
+      "single_rider": false
+    },
+    {
+      "id": "tower_of_terror",
+      "name": "タワー・オブ・テラー",
+      "name_en": "Tower of Terror",
+      "park": "tds",
+      "area": "american_waterfront",
+      "type": "ライド",
+      "subtype": "フリーフォール",
+      "opened": "2006-09-04",
+      "duration_minutes": 2,
+      "capacity": 22,
+      "height_restriction": 102,
+      "age_restriction": null,
+      "dpa_available": true,
+      "dpa_price": 2000,
+      "standby_pass": false,
+      "fastpass": false,
+      "description": "呪われたホテルのエレベーターが急降下・急上昇を繰り返すスリルライド。東京ディズニーシー最恐アトラクション。",
+      "backstory": "1899年のニューヨーク。大富豪ハリソン・ハイタワー三世が収集した呪いの偶像シリキ・ウトゥンドゥにより、エレベーターが暴走。ハイタワー三世は行方不明に...",
+      "trivia": [
+        "建物の高さは約59m（パーク内最高）",
+        "落下パターンは複数あり、乗るたびに違う動きをすることも",
+        "日本オリジナルのストーリー（他国とは設定が異なる）",
+        "シリキ・ウトゥンドゥはコンゴの部族の言葉で「災いを信じろ」の意味"
+      ],
+      "tips": [
+        "落下の瞬間に外の景色が見える（余裕があれば）",
+        "怖い人は目をつぶらずに前を見ると少しマシ",
+        "夜は外観がライトアップされて不気味さ倍増"
+      ],
+      "wait_time_trend": {
+        "weekday": {"morning": 60, "afternoon": 90, "evening": 45},
+        "weekend": {"morning": 90, "afternoon": 120, "evening": 60}
+      },
+      "hidden_mickeys": [
+        {
+          "location": "待機列の書斎",
+          "hint": "壁に飾られた絵画の中",
+          "difficulty": "medium"
+        }
+      ],
+      "photo_spots": ["建物外観", "落下中（自動撮影）"],
+      "wheelchair_accessible": false,
+      "single_rider": false
+    },
+    {
+      "id": "toy_story_mania",
+      "name": "トイ・ストーリー・マニア！",
+      "name_en": "Toy Story Mania!",
+      "park": "tds",
+      "area": "american_waterfront",
+      "type": "ライド",
+      "subtype": "シューティング",
+      "opened": "2012-07-09",
+      "duration_minutes": 7,
+      "capacity": 8,
+      "height_restriction": null,
+      "age_restriction": null,
+      "dpa_available": true,
+      "dpa_price": 2000,
+      "standby_pass": true,
+      "fastpass": false,
+      "description": "3Dメガネをかけてシューティングゲームを楽しむ体感型アトラクション。ウッディたちが主催するカーニバルに参加！",
+      "backstory": "アンディの部屋のおもちゃたちが開催するカーニバルゲーム大会。ゲストはおもちゃサイズになって参加します。",
+      "trivia": [
+        "ゲームは5種類（練習含む）",
+        "最高得点は理論上999,999点",
+        "隠れターゲットを狙うと高得点",
+        "3Dメガネのデザインは複数パターンある"
+      ],
+      "tips": [
+        "紐を引くタイプなので腕が疲れる覚悟を",
+        "的の中心より少し上を狙うと当たりやすい",
+        "高得点を狙うなら隠れターゲットを探そう"
+      ],
+      "wait_time_trend": {
+        "weekday": {"morning": 60, "afternoon": 90, "evening": 45},
+        "weekend": {"morning": 90, "afternoon": 120, "evening": 60}
+      },
+      "hidden_mickeys": [
+        {
+          "location": "待機列の壁画",
+          "hint": "クレヨンで描かれた太陽の中",
+          "difficulty": "easy"
+        }
+      ],
+      "photo_spots": ["入口のウッディとバズの像"],
+      "wheelchair_accessible": true,
+      "single_rider": false
+    },
+    {
+      "id": "soaring",
+      "name": "ソアリン:ファンタスティック・フライト",
+      "name_en": "Soaring: Fantastic Flight",
+      "park": "tds",
+      "area": "mediterranean_harbor",
+      "type": "ライド",
+      "subtype": "シミュレーター",
+      "opened": "2019-07-23",
+      "duration_minutes": 5,
+      "capacity": 87,
+      "height_restriction": 102,
+      "age_restriction": null,
+      "dpa_available": true,
+      "dpa_price": 2000,
+      "standby_pass": true,
+      "fastpass": false,
+      "description": "空飛ぶ乗り物「ドリームフライヤー」に乗って世界中の名所を巡る感動のフライトアトラクション。風や香りも体感できます。",
+      "backstory": "飛行の研究に生涯を捧げた女性カメリア・ファルコの博物館。彼女が夢見た「空を飛ぶ」体験を最新技術で実現しています。",
+      "trivia": [
+        "世界6大陸の名所を巡る（エッフェル塔、万里の長城など）",
+        "香りは8種類（草原、海、バラなど）",
+        "最後に飛ぶ場所は東京ディズニーシー",
+        "座席は3段階あり、一番上が一番臨場感がある"
+      ],
+      "tips": [
+        "足がブラブラするので靴が脱げやすい（注意）",
+        "一番上の列がおすすめ（景色がよく見える）",
+        "朝イチは比較的空いている"
+      ],
+      "wait_time_trend": {
+        "weekday": {"morning": 50, "afternoon": 80, "evening": 40},
+        "weekend": {"morning": 70, "afternoon": 100, "evening": 50}
+      },
+      "hidden_mickeys": [
+        {
+          "location": "プレショーの博物館内",
+          "hint": "壁に飾られた地図の中",
+          "difficulty": "medium"
+        }
+      ],
+      "photo_spots": ["博物館入口", "ドリームフライヤー搭乗前"],
+      "wheelchair_accessible": false,
+      "single_rider": false
+    },
+    {
+      "id": "journey_to_center",
+      "name": "センター・オブ・ジ・アース",
+      "name_en": "Journey to the Center of the Earth",
+      "park": "tds",
+      "area": "mysterious_island",
+      "type": "ライド",
+      "subtype": "ローラーコースター",
+      "opened": "2001-09-04",
+      "duration_minutes": 3,
+      "capacity": 6,
+      "height_restriction": 117,
+      "age_restriction": null,
+      "dpa_available": true,
+      "dpa_price": 2000,
+      "standby_pass": false,
+      "fastpass": false,
+      "description": "ネモ船長の地底探検車に乗って、地底世界を冒険。最後は火山から噴き出すように急上昇・急降下！",
+      "backstory": "ジュール・ヴェルヌの「地底旅行」をモチーフに、ネモ船長が発見した地底世界を探検します。",
+      "trivia": [
+        "最高時速は約75km/h（東京ディズニーリゾート最速）",
+        "地底探検車は本当にレールの上を走っている",
+        "噴火のエフェクトは本物の炎ではなく布と送風機",
+        "待ち列にはネモ船長の研究室が再現されている"
+      ],
+      "tips": [
+        "落下時に一瞬だけパークの景色が見える",
+        "暗い場所が多いので怖い人は注意",
+        "写真撮影ポイントは落下手前"
+      ],
+      "wait_time_trend": {
+        "weekday": {"morning": 50, "afternoon": 70, "evening": 35},
+        "weekend": {"morning": 70, "afternoon": 100, "evening": 50}
+      },
+      "hidden_mickeys": [
+        {
+          "location": "待機列のネモ船長の研究室",
+          "hint": "実験器具の配置",
+          "difficulty": "hard"
+        }
+      ],
+      "photo_spots": ["火山の前", "落下時（自動撮影）"],
+      "wheelchair_accessible": false,
+      "single_rider": false
+    },
+    {
+      "id": "pirates_caribbean",
+      "name": "カリブの海賊",
+      "name_en": "Pirates of the Caribbean",
+      "park": "tdl",
+      "area": "adventureland",
+      "type": "ライド",
+      "subtype": "ボートライド",
+      "opened": "1983-04-15",
+      "duration_minutes": 15,
+      "capacity": 20,
+      "height_restriction": null,
+      "age_restriction": null,
+      "dpa_available": false,
+      "dpa_price": null,
+      "standby_pass": false,
+      "fastpass": false,
+      "description": "ボートに乗って海賊たちの世界を冒険。ジャック・スパロウも登場する名作アトラクション。",
+      "backstory": "カリブ海を舞台に、海賊たちの襲撃や宝探しの世界を体験。映画「パイレーツ・オブ・カリビアン」の世界観が融合しています。",
+      "trivia": [
+        "ウォルト・ディズニーが監修した最後のアトラクション",
+        "映画「パイレーツ・オブ・カリビアン」はこのアトラクションから生まれた",
+        "約120体のオーディオアニマトロニクスが動いている",
+        "最初の小さな落下で少しだけ水しぶきがかかる"
+      ],
+      "tips": [
+        "待ち時間が短いことが多く、穴場",
+        "涼しいので暑い日の休憩にもおすすめ",
+        "レストラン「ブルーバイユー」がアトラクション内から見える"
+      ],
+      "wait_time_trend": {
+        "weekday": {"morning": 15, "afternoon": 25, "evening": 10},
+        "weekend": {"morning": 20, "afternoon": 35, "evening": 15}
+      },
+      "hidden_mickeys": [
+        {
+          "location": "宝の山のシーン",
+          "hint": "積まれた宝物の中に...",
+          "difficulty": "hard"
+        }
+      ],
+      "photo_spots": ["入口の海賊船"],
+      "wheelchair_accessible": true,
+      "single_rider": false
+    },
+    {
+      "id": "haunted_mansion",
+      "name": "ホーンテッドマンション",
+      "name_en": "Haunted Mansion",
+      "park": "tdl",
+      "area": "fantasyland",
+      "type": "ライド",
+      "subtype": "ダークライド",
+      "opened": "1983-04-15",
+      "duration_minutes": 15,
+      "capacity": 3,
+      "height_restriction": null,
+      "age_restriction": null,
+      "dpa_available": false,
+      "dpa_price": null,
+      "standby_pass": false,
+      "fastpass": false,
+      "description": "999人の幽霊が住む館をドゥームバギーに乗って探検。怖いけどどこかユーモラスな幽霊たちに出会えます。",
+      "backstory": "ハッピーライドを求める999人の幽霊たちが住む館。1000人目の仲間を探しています...それはあなたかも？",
+      "trivia": [
+        "「ホリデーナイトメア」期間はナイトメア仕様になる",
+        "伸びる部屋の天井が上がっているのか床が下がっているのか？（答えは両方あり）",
+        "最後の鏡に幽霊が映り込む演出がある",
+        "幽霊たちは全て投影技術で表現されている"
+      ],
+      "tips": [
+        "秋〜冬はナイトメア・ビフォア・クリスマス仕様でおすすめ",
+        "待ち時間は短めで効率よく回れる",
+        "怖すぎないので子供でも楽しめる"
+      ],
+      "wait_time_trend": {
+        "weekday": {"morning": 20, "afternoon": 30, "evening": 15},
+        "weekend": {"morning": 30, "afternoon": 45, "evening": 20}
+      },
+      "hidden_mickeys": [
+        {
+          "location": "ダイニングルームのテーブル",
+          "hint": "お皿の配置を見て",
+          "difficulty": "medium"
+        }
+      ],
+      "photo_spots": ["館の外観"],
+      "wheelchair_accessible": true,
+      "single_rider": false
+    }
+  ]
+}
+
+
+

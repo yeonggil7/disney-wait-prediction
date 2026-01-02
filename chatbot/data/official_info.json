@@ -1,0 +1,233 @@
+{
+  "official_urls": {
+    "main": "https://www.tokyodisneyresort.jp/",
+    "app": "https://www.tokyodisneyresort.jp/tdr/app/",
+    "tdl_attractions": "https://www.tokyodisneyresort.jp/tdl/attraction.html",
+    "tds_attractions": "https://www.tokyodisneyresort.jp/tds/attraction.html",
+    "tdl_restaurants": "https://www.tokyodisneyresort.jp/tdl/restaurant.html",
+    "tds_restaurants": "https://www.tokyodisneyresort.jp/tds/restaurant.html",
+    "premium_access": "https://www.tokyodisneyresort.jp/tdr/guide/app_service/disneypremieraccess.html",
+    "priority_seating": "https://www.tokyodisneyresort.jp/tdl/guide/priorityseating.html",
+    "tdl_daily": "https://www.tokyodisneyresort.co.jp/tdl/daily/",
+    "tds_daily": "https://www.tokyodisneyresort.co.jp/tds/daily/",
+    "allergen_info": "https://fsp.tokyodisneyresort.jp/"
+  },
+  "events": {
+    "current_and_upcoming": [
+      {
+        "name": "ディズニー・クリスマス",
+        "start_date": "2025-11-11",
+        "end_date": "2025-12-25",
+        "park": "both",
+        "description": "パーク全体がクリスマスの装飾で彩られ、特別なショーやパレード、限定メニューが楽しめます"
+      },
+      {
+        "name": "東京ディズニーシー25周年",
+        "start_date": "2024-09-04",
+        "end_date": "2025-09-03",
+        "park": "tds",
+        "description": "東京ディズニーシー開園25周年を記念した特別プログラム"
+      },
+      {
+        "name": "ディズニー・パルパルーザ ミニーのファンダーランド",
+        "start_date": "2026-01-14",
+        "end_date": "2026-03-02",
+        "park": "tdl",
+        "description": "ミニーマウスをテーマにした特別イベント"
+      },
+      {
+        "name": "ディズニーストーリービヨンド",
+        "start_date": "2026-01-14",
+        "end_date": "2026-03-19",
+        "park": "tds",
+        "description": "ディズニーの物語の世界を超えた体験"
+      }
+    ]
+  },
+  "ticket_prices": {
+    "1day_passport": {
+      "adult": {
+        "min": 7900,
+        "max": 10900,
+        "note": "日によって価格が変動（変動価格制）"
+      },
+      "junior": {
+        "min": 6600,
+        "max": 9000,
+        "age_range": "12-17歳"
+      },
+      "child": {
+        "min": 4700,
+        "max": 5600,
+        "age_range": "4-11歳"
+      }
+    },
+    "note": "価格は2024年時点。最新の料金は公式サイトでご確認ください"
+  },
+  "premium_access": {
+    "description": "ディズニー・プレミアアクセス（DPA）は、対象のアトラクションやショーを少ない待ち時間で楽しめる有料サービス",
+    "how_to_use": [
+      "入園後、東京ディズニーリゾート・アプリで購入",
+      "対象施設と時間を選択",
+      "クレジットカードで決済",
+      "指定時間に施設へ行く"
+    ],
+    "attractions": {
+      "tdl": [
+        {"name": "美女と野獣\"魔法のものがたり\"", "price": 2000},
+        {"name": "ベイマックスのハッピーライド", "price": 1500},
+        {"name": "スプラッシュ・マウンテン", "price": 1500},
+        {"name": "ビッグサンダー・マウンテン", "price": 1500},
+        {"name": "スペース・マウンテン", "price": 1500}
+      ],
+      "tds": [
+        {"name": "ソアリン:ファンタスティック・フライト", "price": 2000},
+        {"name": "トイ・ストーリー・マニア！", "price": 2000},
+        {"name": "タワー・オブ・テラー", "price": 2000},
+        {"name": "センター・オブ・ジ・アース", "price": 2000},
+        {"name": "インディ・ジョーンズ・アドベンチャー", "price": 2000},
+        {"name": "アナとエルサのフローズンジャーニー", "price": 2000},
+        {"name": "ラプンツェルのランタンフェスティバル", "price": 2000},
+        {"name": "ピーターパンのネバーランドアドベンチャー", "price": 2000}
+      ]
+    }
+  },
+  "height_restrictions": {
+    "90cm": [
+      "スプラッシュ・マウンテン",
+      "ガジェットのゴーコースター"
+    ],
+    "102cm": [
+      "ビッグサンダー・マウンテン",
+      "スペース・マウンテン",
+      "タワー・オブ・テラー",
+      "ソアリン:ファンタスティック・フライト"
+    ],
+    "117cm": [
+      "センター・オブ・ジ・アース",
+      "インディ・ジョーンズ・アドベンチャー",
+      "レイジングスピリッツ"
+    ],
+    "81cm": [
+      "ベイマックスのハッピーライド"
+    ]
+  },
+  "standby_pass": {
+    "description": "人気施設の入場時間を予約できる無料サービス",
+    "how_to_use": [
+      "入園後、アプリで取得",
+      "利用したい施設を選択",
+      "時間を選んで取得",
+      "指定時間に施設へ"
+    ],
+    "target_attractions": {
+      "tdl": ["美女と野獣\"魔法のものがたり\"", "ベイマックスのハッピーライド"],
+      "tds": ["ソアリン:ファンタスティック・フライト", "トイ・ストーリー・マニア！"]
+    },
+    "tips": [
+      "入園直後は混み合うので少し待ってから",
+      "人気施設は午前中に発券終了することも",
+      "一度に1つしか持てない"
+    ]
+  },
+  "mobile_order": {
+    "description": "レストランの料理を事前注文し、指定時間に受け取れるサービス",
+    "how_to_use": [
+      "アプリで「モバイルオーダー」を選択",
+      "レストランを選ぶ",
+      "メニューを選んでカートに入れる",
+      "受取時間を選択",
+      "決済して注文完了"
+    ],
+    "target_restaurants_tdl": [
+      "クイーン・オブ・ハートのバンケットホール",
+      "グランマ・サラのキッチン",
+      "ハングリーベア・レストラン",
+      "プラザ・レストラン",
+      "トゥモローランド・テラス"
+    ],
+    "target_restaurants_tds": [
+      "ケープコッド・クックオフ",
+      "ヴォルケイニア・レストラン",
+      "カスバ・フードコート",
+      "セバスチャンのカリプソキッチン",
+      "ザンビーニ・ブラザーズ・リストランテ"
+    ]
+  },
+  "priority_seating": {
+    "description": "対象レストランの事前予約サービス",
+    "booking_start": "利用日の1ヶ月前10:00から",
+    "online_same_day": "当日9:00から",
+    "in_store": "当日10:00から",
+    "target_restaurants_tdl": [
+      "ブルーバイユー・レストラン",
+      "イーストサイド・カフェ",
+      "れすとらん北齋",
+      "ザ・ダイヤモンドホースシュー",
+      "ポリネシアンテラス・レストラン"
+    ],
+    "target_restaurants_tds": [
+      "マゼランズ",
+      "リストランテ・ディ・カナレット",
+      "S.S.コロンビア・ダイニングルーム",
+      "レストラン櫻",
+      "テディ・ルーズヴェルト・ラウンジ"
+    ]
+  },
+  "fantasy_springs": {
+    "opened": "2024-06-06",
+    "description": "東京ディズニーシーの8番目のテーマポート。アナと雪の女王、塔の上のラプンツェル、ピーターパンの世界を体験",
+    "areas": [
+      {
+        "name": "フローズンキングダム",
+        "theme": "アナと雪の女王",
+        "attractions": ["アナとエルサのフローズンジャーニー"]
+      },
+      {
+        "name": "ラプンツェルの森",
+        "theme": "塔の上のラプンツェル",
+        "attractions": ["ラプンツェルのランタンフェスティバル"]
+      },
+      {
+        "name": "ピーターパンのネバーランド",
+        "theme": "ピーターパン",
+        "attractions": ["ピーターパンのネバーランドアドベンチャー", "フェアリー・ティンカーベルのビジーバギー"]
+      }
+    ],
+    "restaurants": [
+      {"name": "ロイヤルバンケット・オブ・アレンデール", "theme": "アナと雪の女王"},
+      {"name": "ラ・タベルナ", "theme": "地中海料理"},
+      {"name": "スナグリーダックリング", "theme": "塔の上のラプンツェル"}
+    ],
+    "access": "スタンバイパスまたはプレミアアクセスが必要な場合あり"
+  },
+  "wait_time_info": {
+    "realtime_unofficial": [
+      {"name": "TDR Waits", "url": "https://tdls.tokyo/"},
+      {"name": "ディズニーリアル", "url": "https://disneyreal.asumirai.info/"}
+    ],
+    "average_wait_times": {
+      "fantasy_springs": {
+        "アナとエルサのフローズンジャーニー": {"平日": 90, "休日": 150},
+        "ラプンツェルのランタンフェスティバル": {"平日": 80, "休日": 120},
+        "ピーターパンのネバーランドアドベンチャー": {"平日": 100, "休日": 160}
+      }
+    }
+  },
+  "app_features": [
+    "パークチケットの購入・管理",
+    "アトラクション・レストランの待ち時間確認",
+    "デジタルガイドマップ",
+    "ディズニー・プレミアアクセスの購入",
+    "スタンバイパスの取得",
+    "エントリー受付（抽選）",
+    "モバイルオーダー",
+    "ディズニー・フォト",
+    "オンラインショッピング",
+    "ホテルのオンラインチェックイン"
+  ],
+  "last_updated": "2024-12-22"
+}
+
+
+

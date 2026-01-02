@@ -1,0 +1,254 @@
+{
+  "hidden_mickeys": {
+    "description": "隠れミッキーとは、パーク内の様々な場所に隠されたミッキーマウスのシルエットのこと。3つの円が組み合わさったクラシックな形が多いですが、横顔や全身など様々なパターンがあります。",
+    "types": [
+      {
+        "type": "classic",
+        "name": "クラシック（3つの丸）",
+        "description": "最も一般的な形。大きな丸1つと小さな丸2つで構成される"
+      },
+      {
+        "type": "profile",
+        "name": "横顔",
+        "description": "ミッキーの横顔のシルエット"
+      },
+      {
+        "type": "full_body",
+        "name": "全身",
+        "description": "ミッキーの全身が描かれているタイプ"
+      }
+    ],
+    "locations": {
+      "tdl": [
+        {
+          "area": "ワールドバザール",
+          "spots": [
+            {
+              "name": "エンポーリアム前の地面",
+              "hint": "レンガの模様をよく見て",
+              "difficulty": "easy",
+              "type": "classic"
+            },
+            {
+              "name": "メインストリート・シネマ前",
+              "hint": "窓のデザインに注目",
+              "difficulty": "medium",
+              "type": "classic"
+            }
+          ]
+        },
+        {
+          "area": "アドベンチャーランド",
+          "spots": [
+            {
+              "name": "カリブの海賊の宝の山",
+              "hint": "積み上げられた宝物の中に",
+              "difficulty": "hard",
+              "type": "classic"
+            },
+            {
+              "name": "ジャングルクルーズ乗船場",
+              "hint": "壁の装飾を探して",
+              "difficulty": "medium",
+              "type": "profile"
+            }
+          ]
+        },
+        {
+          "area": "ウエスタンランド",
+          "spots": [
+            {
+              "name": "ビッグサンダー・マウンテン待機列",
+              "hint": "歯車が3つ並んでいる場所",
+              "difficulty": "easy",
+              "type": "classic"
+            },
+            {
+              "name": "トムソーヤ島いかだ乗り場",
+              "hint": "木の看板の中",
+              "difficulty": "medium",
+              "type": "classic"
+            }
+          ]
+        },
+        {
+          "area": "ファンタジーランド",
+          "spots": [
+            {
+              "name": "ホーンテッドマンションのダイニングルーム",
+              "hint": "テーブルの上のお皿の配置",
+              "difficulty": "medium",
+              "type": "classic"
+            },
+            {
+              "name": "プーさんのハニーハント入口",
+              "hint": "はちみつの染みの形",
+              "difficulty": "easy",
+              "type": "classic"
+            },
+            {
+              "name": "美女と野獣\"魔法のものがたり\"待機列",
+              "hint": "本棚のデザインをよく見て",
+              "difficulty": "medium",
+              "type": "classic"
+            }
+          ]
+        },
+        {
+          "area": "トゥモローランド",
+          "spots": [
+            {
+              "name": "スペース・マウンテン待機列",
+              "hint": "惑星の模型が並ぶ場所",
+              "difficulty": "hard",
+              "type": "classic"
+            },
+            {
+              "name": "バズ・ライトイヤーのアストロブラスター",
+              "hint": "壁のポスターの中",
+              "difficulty": "medium",
+              "type": "profile"
+            }
+          ]
+        },
+        {
+          "area": "トゥーンタウン",
+          "spots": [
+            {
+              "name": "ミニーの家のキッチン",
+              "hint": "キッチン用品の形",
+              "difficulty": "easy",
+              "type": "classic"
+            },
+            {
+              "name": "ロジャーラビットのカートゥーンスピン",
+              "hint": "待機列の壁画",
+              "difficulty": "medium",
+              "type": "full_body"
+            }
+          ]
+        }
+      ],
+      "tds": [
+        {
+          "area": "メディテレーニアンハーバー",
+          "spots": [
+            {
+              "name": "ソアリン:ファンタスティック・フライト",
+              "hint": "博物館内の地図の中",
+              "difficulty": "medium",
+              "type": "classic"
+            },
+            {
+              "name": "ゴンドリエ・スナック近く",
+              "hint": "建物の壁の装飾",
+              "difficulty": "hard",
+              "type": "classic"
+            }
+          ]
+        },
+        {
+          "area": "アメリカンウォーターフロント",
+          "spots": [
+            {
+              "name": "タワー・オブ・テラー待機列",
+              "hint": "書斎の絵画の中",
+              "difficulty": "medium",
+              "type": "classic"
+            },
+            {
+              "name": "トイ・ストーリー・マニア！待機列",
+              "hint": "クレヨンで描かれた太陽",
+              "difficulty": "easy",
+              "type": "classic"
+            },
+            {
+              "name": "S.S.コロンビア号",
+              "hint": "船内の装飾品",
+              "difficulty": "hard",
+              "type": "profile"
+            }
+          ]
+        },
+        {
+          "area": "ミステリアスアイランド",
+          "spots": [
+            {
+              "name": "センター・オブ・ジ・アース待機列",
+              "hint": "ネモ船長の研究室の実験器具",
+              "difficulty": "hard",
+              "type": "classic"
+            },
+            {
+              "name": "海底2万マイル待機列",
+              "hint": "潜水服のディスプレイ",
+              "difficulty": "medium",
+              "type": "classic"
+            }
+          ]
+        },
+        {
+          "area": "マーメイドラグーン",
+          "spots": [
+            {
+              "name": "アリエルのプレイグラウンド",
+              "hint": "貝殻のモザイク",
+              "difficulty": "easy",
+              "type": "classic"
+            },
+            {
+              "name": "キング・トリトンのコンサート",
+              "hint": "壁面の装飾",
+              "difficulty": "medium",
+              "type": "profile"
+            }
+          ]
+        },
+        {
+          "area": "アラビアンコースト",
+          "spots": [
+            {
+              "name": "マジックランプシアター待機列",
+              "hint": "タイルの模様",
+              "difficulty": "medium",
+              "type": "classic"
+            },
+            {
+              "name": "シンドバッド・ストーリーブック・ヴォヤッジ",
+              "hint": "宝物のシーン",
+              "difficulty": "hard",
+              "type": "classic"
+            }
+          ]
+        },
+        {
+          "area": "ロストリバーデルタ",
+          "spots": [
+            {
+              "name": "インディ・ジョーンズ・アドベンチャー待機列",
+              "hint": "壁画の中",
+              "difficulty": "medium",
+              "type": "classic"
+            },
+            {
+              "name": "レイジングスピリッツ",
+              "hint": "遺跡の装飾",
+              "difficulty": "hard",
+              "type": "profile"
+            }
+          ]
+        }
+      ]
+    },
+    "tips": [
+      "隠れミッキー探しは待ち時間の暇つぶしにピッタリ",
+      "難易度が高いものは地元のファンでも見つけにくい",
+      "季節イベント期間は限定の隠れミッキーが登場することも",
+      "キャストに聞いても教えてくれないことが多い（お楽しみを奪わないため）",
+      "公式には「隠れミッキー」という呼び方はしていない"
+    ]
+  }
+}
+
+
+

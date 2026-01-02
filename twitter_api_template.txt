@@ -1,0 +1,17 @@
+# Twitter (X) API認証情報の設定方法
+# =============================================
+#
+# 1. https://developer.twitter.com/en/portal/dashboard でアプリを作成
+# 2. 以下の値を取得
+# 3. ~/.zshrc または ~/.bashrc に以下を追加:
+
+export TWITTER_API_KEY="your_api_key_here"
+export TWITTER_API_SECRET="your_api_secret_here"
+export TWITTER_ACCESS_TOKEN="your_access_token_here"
+export TWITTER_ACCESS_TOKEN_SECRET="your_access_token_secret_here"
+export TWITTER_BEARER_TOKEN="your_bearer_token_here"
+
+# または、launchdのplistファイル内のEnvironmentVariablesセクションに直接設定:
+# ~/Library/LaunchAgents/com.disney.daily-prediction.plist
+
+

@@ -1,0 +1,29 @@
+{
+  "analysis_date": "20250703_111743",
+  "target_date": "2025年7月2日",
+  "time_slots_count": 7,
+  "time_slots": [
+    "08:15",
+    "08:45",
+    "09:15",
+    "09:45",
+    "10:15",
+    "10:45",
+    "11:15"
+  ],
+  "attraction_count": 42,
+  "attraction_names": [
+    "オムニバス",
+    "リバ｜鉄道",
+    "カリブの海賊",
+    "ジャングル",
+    "ツリ｜ハウス",
+    "魅惑のチキル｜ム",
+    "ビッグサンダ｜",
+    "Ｓギャラリ｜",
+    "ベア・シアタ｜",
+    "いかだ"
+  ],
+  "source_url": "https://yosocal.com/realtime.htm",
+  "target_achieved": false
+}

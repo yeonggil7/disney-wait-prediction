@@ -1,0 +1,50 @@
+{
+  "user_id": "session_q7ektemq5",
+  "name": null,
+  "preferences": {
+    "favorite_park": null,
+    "thrill_preference": 3,
+    "has_children": false,
+    "favorite_attractions": [],
+    "disliked_attractions": [],
+    "favorite_characters": [],
+    "food_preferences": [],
+    "visited_count": 0,
+    "last_visit": null
+  },
+  "conversation_history": [
+    {
+      "role": "user",
+      "content": "今日のおすすめプランを教えて",
+      "timestamp": "2025-12-23T07:59:51.739371"
+    },
+    {
+      "role": "assistant",
+      "content": "すみません、その質問にはまだ対応していません。🙇\n\n以下のような質問に答えられます：\n・アトラクションの情報（「美女と野獣について」）\n・隠れミッキーの場所\n・アプリの使い方（スタンバイパス、予約など）\n・初心者向けのアドバイス",
+      "timestamp": "2025-12-23T07:59:51.739683"
+    },
+    {
+      "role": "user",
+      "content": "今日のおすすめプランを教えて",
+      "timestamp": "2025-12-23T08:02:01.445270"
+    },
+    {
+      "role": "assistant",
+      "content": "すみません、その質問にはまだ対応していません。🙇\n\n以下のような質問に答えられます：\n・アトラクションの情報（「美女と野獣について」）\n・隠れミッキーの場所\n・アプリの使い方（スタンバイパス、予約など）\n・初心者向けのアドバイス",
+      "timestamp": "2025-12-23T08:02:01.447254"
+    },
+    {
+      "role": "user",
+      "content": "今日のおすすめプランを教えて",
+      "timestamp": "2025-12-23T08:02:04.487325"
+    },
+    {
+      "role": "assistant",
+      "content": "すみません、その質問にはまだ対応していません。🙇\n\n以下のような質問に答えられます：\n・アトラクションの情報（「美女と野獣について」）\n・隠れミッキーの場所\n・アプリの使い方（スタンバイパス、予約など）\n・初心者向けのアドバイス",
+      "timestamp": "2025-12-23T08:02:04.488891"
+    }
+  ],
+  "learned_topics": {},
+  "created_at": "2025-12-23T07:59:51.738595",
+  "updated_at": "2025-12-23T08:02:04.488901"
+}

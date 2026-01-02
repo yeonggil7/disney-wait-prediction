@@ -1,0 +1,296 @@
+{
+  "hidden_mickeys": {
+    "description": "隠れミッキーとは、パーク内のあちこちに隠されたミッキーの形。探すのもディズニーの楽しみ方の一つ",
+    "tokyo_disney_land": {
+      "world_bazaar": [
+        {
+          "location": "ワールドバザール・コンフェクショナリー",
+          "hint": "床のタイルをよく見ると...",
+          "difficulty": "easy"
+        },
+        {
+          "location": "メインストリートの街灯",
+          "hint": "電球の配置に注目",
+          "difficulty": "medium"
+        },
+        {
+          "location": "ペニーアーケード",
+          "hint": "古い機械の装飾に隠れている",
+          "difficulty": "hard"
+        }
+      ],
+      "adventureland": [
+        {
+          "location": "カリブの海賊 待機列",
+          "hint": "壁の装飾の中に...",
+          "difficulty": "medium"
+        },
+        {
+          "location": "ジャングルクルーズ",
+          "hint": "ボート乗り場付近の木の根元",
+          "difficulty": "hard"
+        },
+        {
+          "location": "魅惑のチキルーム",
+          "hint": "天井の装飾をよく見ると",
+          "difficulty": "medium"
+        }
+      ],
+      "westernland": [
+        {
+          "location": "ビッグサンダー・マウンテン 待機列",
+          "hint": "岩肌に描かれた絵の中に",
+          "difficulty": "medium"
+        },
+        {
+          "location": "カントリーベア・シアター",
+          "hint": "劇場内の壁のデコレーション",
+          "difficulty": "hard"
+        },
+        {
+          "location": "ウエスタンランド・シューティングギャラリー",
+          "hint": "的の配置に注目",
+          "difficulty": "medium"
+        }
+      ],
+      "fantasyland": [
+        {
+          "location": "美女と野獣\"魔法のものがたり\" 待機列",
+          "hint": "本棚の本の背表紙のデザイン",
+          "difficulty": "medium"
+        },
+        {
+          "location": "美女と野獣\"魔法のものがたり\" ライド中",
+          "hint": "ステンドグラスの一部に",
+          "difficulty": "hard"
+        },
+        {
+          "location": "ホーンテッドマンション",
+          "hint": "墓石のデザインの中に",
+          "difficulty": "hard"
+        },
+        {
+          "location": "プーさんのハニーハント",
+          "hint": "はちみつの壺の並び方",
+          "difficulty": "easy"
+        },
+        {
+          "location": "イッツ・ア・スモールワールド",
+          "hint": "世界中の人形たちの中に混じって...",
+          "difficulty": "medium"
+        },
+        {
+          "location": "キャッスルカルーセル",
+          "hint": "馬の装飾の中に",
+          "difficulty": "hard"
+        }
+      ],
+      "tomorrowland": [
+        {
+          "location": "スペース・マウンテン 待機列",
+          "hint": "宇宙のパネルの星の配置",
+          "difficulty": "hard"
+        },
+        {
+          "location": "バズ・ライトイヤーのアストロブラスター",
+          "hint": "壁の惑星の模様",
+          "difficulty": "medium"
+        },
+        {
+          "location": "スター・ツアーズ 待機列",
+          "hint": "ドロイドの部品の中に",
+          "difficulty": "hard"
+        },
+        {
+          "location": "ベイマックスのハッピーライド",
+          "hint": "床のデザインの中に",
+          "difficulty": "easy"
+        }
+      ],
+      "toontown": [
+        {
+          "location": "ミニーのスタイルスタジオ",
+          "hint": "スタジオ内の小物の配置",
+          "difficulty": "easy"
+        },
+        {
+          "location": "ロジャーラビットのカートゥーンスピン",
+          "hint": "待機列の壁の落書き",
+          "difficulty": "medium"
+        },
+        {
+          "location": "トゥーンタウンの道路",
+          "hint": "マンホールの蓋",
+          "difficulty": "easy"
+        }
+      ],
+      "critter_country": [
+        {
+          "location": "スプラッシュ・マウンテン 待機列",
+          "hint": "木の節の形",
+          "difficulty": "medium"
+        },
+        {
+          "location": "スプラッシュ・マウンテン 落下写真",
+          "hint": "背景に隠れている",
+          "difficulty": "hard"
+        }
+      ]
+    },
+    "tokyo_disney_sea": {
+      "mediterranean_harbor": [
+        {
+          "location": "ソアリン:ファンタスティック・フライト 待機列",
+          "hint": "壁画の中に隠れている",
+          "difficulty": "hard"
+        },
+        {
+          "location": "ソアリン ライド中",
+          "hint": "飛行中の景色の一部に",
+          "difficulty": "very_hard"
+        },
+        {
+          "location": "ヴェネツィアン・ゴンドラ 周辺",
+          "hint": "建物の壁のデコレーション",
+          "difficulty": "medium"
+        },
+        {
+          "location": "フォートレス・エクスプロレーション",
+          "hint": "地図の島の形",
+          "difficulty": "hard"
+        }
+      ],
+      "american_waterfront": [
+        {
+          "location": "タワー・オブ・テラー 待機列",
+          "hint": "ホテルのロビーのタイルの模様",
+          "difficulty": "medium"
+        },
+        {
+          "location": "トイ・ストーリー・マニア！ 待機列",
+          "hint": "おもちゃの並び方に注目",
+          "difficulty": "easy"
+        },
+        {
+          "location": "S.S.コロンビア号",
+          "hint": "船内の装飾品の中に",
+          "difficulty": "hard"
+        },
+        {
+          "location": "ブロードウェイ・ミュージックシアター前",
+          "hint": "ポスターのデザインの一部",
+          "difficulty": "medium"
+        }
+      ],
+      "mysterious_island": [
+        {
+          "location": "センター・オブ・ジ・アース 待機列",
+          "hint": "岩肌の模様の中に",
+          "difficulty": "hard"
+        },
+        {
+          "location": "海底2万マイル 待機列",
+          "hint": "研究所の装置の一部",
+          "difficulty": "medium"
+        },
+        {
+          "location": "ノーチラスギャレー",
+          "hint": "潜水艦の窓から見える景色",
+          "difficulty": "hard"
+        }
+      ],
+      "lost_river_delta": [
+        {
+          "location": "インディ・ジョーンズ・アドベンチャー 待機列",
+          "hint": "壁画の絵の中に",
+          "difficulty": "medium"
+        },
+        {
+          "location": "レイジングスピリッツ 周辺",
+          "hint": "遺跡の石の配置",
+          "difficulty": "hard"
+        }
+      ],
+      "mermaid_lagoon": [
+        {
+          "location": "アリエルのプレイグラウンド",
+          "hint": "貝殻の並び方",
+          "difficulty": "easy"
+        },
+        {
+          "location": "キング・トリトンのコンサート会場",
+          "hint": "座席周辺のデコレーション",
+          "difficulty": "medium"
+        }
+      ],
+      "arabian_coast": [
+        {
+          "location": "マジックランプシアター 待機列",
+          "hint": "タイルのモザイク模様",
+          "difficulty": "medium"
+        },
+        {
+          "location": "シンドバッド・ストーリーブック・ヴォヤッジ",
+          "hint": "ライド中の背景に",
+          "difficulty": "hard"
+        },
+        {
+          "location": "ジャスミンのフライングカーペット",
+          "hint": "絨毯の模様の中に",
+          "difficulty": "medium"
+        }
+      ],
+      "port_discovery": [
+        {
+          "location": "アクアトピア",
+          "hint": "水面に浮かぶ装置の配置",
+          "difficulty": "medium"
+        },
+        {
+          "location": "ニモ＆フレンズ・シーライダー 待機列",
+          "hint": "研究所の機器の中に",
+          "difficulty": "hard"
+        }
+      ],
+      "fantasy_springs": [
+        {
+          "location": "アナとエルサのフローズンジャーニー",
+          "hint": "雪の結晶の中に隠れている",
+          "difficulty": "very_hard"
+        },
+        {
+          "location": "ラプンツェルのランタンフェスティバル",
+          "hint": "ランタンの模様に注目",
+          "difficulty": "hard"
+        },
+        {
+          "location": "ピーターパンのネバーランドアドベンチャー",
+          "hint": "妖精の森の装飾の中に",
+          "difficulty": "hard"
+        },
+        {
+          "location": "ファンタジースプリングス入口",
+          "hint": "魔法の泉の周りに",
+          "difficulty": "medium"
+        }
+      ]
+    },
+    "difficulty_guide": {
+      "easy": "初心者でも見つけやすい。案内や看板近くにあることが多い",
+      "medium": "少し注意して見ると見つかる。装飾やデザインの一部",
+      "hard": "かなり注意深く探す必要あり。暗い場所や動いている中で見つける",
+      "very_hard": "熟練者向け。ほとんどの人が気づかない場所に隠れている"
+    },
+    "tips": [
+      "待機列では壁や天井をよく観察しよう",
+      "床のタイルやマンホールも要チェック",
+      "ライド中は周りの景色にも注目",
+      "キャストに聞いてもOK（ヒントをくれることも）",
+      "写真を撮っておくと後で確認できる"
+    ]
+  },
+  "last_updated": "2025-12-22"
+}
+
+
+

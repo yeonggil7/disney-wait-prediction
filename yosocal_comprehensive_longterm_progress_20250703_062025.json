@@ -1,0 +1,71 @@
+{
+  "start_time": "2025-07-03 06:19:58.867322",
+  "total_months": 18,
+  "completed_months": 12,
+  "total_days": 0,
+  "completed_days": 366,
+  "total_records": 61488,
+  "valid_records": 61488,
+  "monthly_stats": {
+    "2024-01": {
+      "total_records": 5208,
+      "valid_records": 5208,
+      "days_processed": 31
+    },
+    "2024-02": {
+      "total_records": 4872,
+      "valid_records": 4872,
+      "days_processed": 29
+    },
+    "2024-03": {
+      "total_records": 5208,
+      "valid_records": 5208,
+      "days_processed": 31
+    },
+    "2024-04": {
+      "total_records": 5040,
+      "valid_records": 5040,
+      "days_processed": 30
+    },
+    "2024-05": {
+      "total_records": 5208,
+      "valid_records": 5208,
+      "days_processed": 31
+    },
+    "2024-06": {
+      "total_records": 5040,
+      "valid_records": 5040,
+      "days_processed": 30
+    },
+    "2024-07": {
+      "total_records": 5208,
+      "valid_records": 5208,
+      "days_processed": 31
+    },
+    "2024-08": {
+      "total_records": 5208,
+      "valid_records": 5208,
+      "days_processed": 31
+    },
+    "2024-09": {
+      "total_records": 5040,
+      "valid_records": 5040,
+      "days_processed": 30
+    },
+    "2024-10": {
+      "total_records": 5208,
+      "valid_records": 5208,
+      "days_processed": 31
+    },
+    "2024-11": {
+      "total_records": 5040,
+      "valid_records": 5040,
+      "days_processed": 30
+    },
+    "2024-12": {
+      "total_records": 5208,
+      "valid_records": 5208,
+      "days_processed": 31
+    }
+  }
+}

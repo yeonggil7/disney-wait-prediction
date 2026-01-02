@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ディズニーガイドBot 🏰</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a237e;
+            --primary-light: #534bae;
+            --secondary: #ff6f00;
+            --secondary-light: #ffa040;
+            --accent: #e91e63;
+            --bg-gradient-start: #0d1b2a;
+            --bg-gradient-end: #1b263b;
+            --surface: rgba(255, 255, 255, 0.05);
+            --surface-hover: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --bot-bubble: linear-gradient(135deg, #1e3a5f 0%, #0d2847 100%);
+            --user-bubble: linear-gradient(135deg, #ff6f00 0%, #ff8f00 100%);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 背景のパーティクル効果 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(255, 111, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(26, 35, 126, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(233, 30, 99, 0.05) 0%, transparent 30%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 星のエフェクト */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* ヘッダー */
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 10px;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 50%, #ffd740 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 111, 0, 0.3);
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--surface);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #888;
+            transition: background 0.3s ease;
+        }
+
+        .status-indicator.active .status-dot {
+            background: #4caf50;
+            box-shadow: 0 0 8px #4caf50;
+        }
+
+        .status-indicator.inactive .status-dot {
+            background: #ff9800;
+        }
+
+        .clear-btn {
+            padding: 6px 12px;
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .clear-btn:hover {
+            background: rgba(255, 82, 82, 0.2);
+            border-color: #ff5252;
+            color: #ff5252;
+        }
+
+        .engine-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            font-size: 0.7rem;
+            margin-left: 8px;
+            color: var(--text-secondary);
+        }
+
+        .engine-badge.llm {
+            background: rgba(76, 175, 80, 0.2);
+            color: #81c784;
+        }
+
+        .engine-badge.rule {
+            background: rgba(33, 150, 243, 0.2);
+            color: #64b5f6;
+        }
+
+        /* チャットエリア */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            border-radius: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 16px;
+            animation: messageIn 0.4s ease-out;
+        }
+
+        @keyframes messageIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+            background: var(--surface);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .message.bot .message-avatar {
+            margin-right: 12px;
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+        }
+
+        .message.user .message-avatar {
+            margin-left: 12px;
+            order: 1;
+            background: linear-gradient(135deg, #ff6f00 0%, #ff8f00 100%);
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 14px 18px;
+            border-radius: 20px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .message.bot .message-bubble {
+            background: var(--bot-bubble);
+            border-bottom-left-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .message.user .message-bubble {
+            background: var(--user-bubble);
+            border-bottom-right-radius: 6px;
+            color: white;
+        }
+
+        .message-bubble strong {
+            color: var(--secondary-light);
+        }
+
+        .message.user .message-bubble strong {
+            color: #fff;
+        }
+
+        /* クイックアクション */
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .quick-actions-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .quick-actions-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            padding-left: 4px;
+        }
+
+        .quick-action-btn {
+            padding: 10px 16px;
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .quick-action-btn:hover {
+            background: var(--surface-hover);
+            border-color: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 111, 0, 0.2);
+        }
+
+        /* 緊急・重要ボタン（大きく目立つ） */
+        .quick-action-btn.urgent {
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.2) 0%, rgba(255, 111, 0, 0.2) 100%);
+            border: 2px solid rgba(255, 111, 0, 0.5);
+            box-shadow: 0 2px 8px rgba(255, 111, 0, 0.2);
+        }
+
+        .quick-action-btn.urgent:hover {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.3) 0%, rgba(255, 111, 0, 0.3) 100%);
+            border-color: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 111, 0, 0.4);
+        }
+
+        /* ファシリティボタン */
+        .quick-action-btn.facility {
+            background: rgba(33, 150, 243, 0.15);
+            border-color: rgba(33, 150, 243, 0.3);
+        }
+
+        .quick-action-btn.facility:hover {
+            background: rgba(33, 150, 243, 0.25);
+            border-color: #2196f3;
+        }
+
+        /* プランボタン */
+        .quick-action-btn.plan {
+            background: linear-gradient(135deg, rgba(156, 39, 176, 0.2) 0%, rgba(103, 58, 183, 0.2) 100%);
+            border: 2px solid rgba(156, 39, 176, 0.4);
+            font-weight: 600;
+        }
+
+        .quick-action-btn.plan:hover {
+            background: linear-gradient(135deg, rgba(156, 39, 176, 0.3) 0%, rgba(103, 58, 183, 0.3) 100%);
+            border-color: #9c27b0;
+        }
+
+        /* プランモーダル */
+        .plan-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .plan-modal.show {
+            display: flex;
+        }
+
+        .plan-modal-content {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .plan-modal h2 {
+            font-size: 1.4rem;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .plan-option {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .plan-option:hover {
+            border-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .plan-option.selected {
+            border-color: var(--secondary);
+            background: rgba(255, 111, 0, 0.1);
+        }
+
+        .plan-option h3 {
+            font-size: 1rem;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .plan-option p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .plan-form-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .plan-form-group {
+            flex: 1;
+        }
+
+        .plan-form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .plan-form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .plan-form-group select:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        .plan-submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .plan-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 111, 0, 0.4);
+        }
+
+        .plan-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* 入力エリア */
+        .input-container {
+            display: flex;
+            gap: 12px;
+            padding: 20px 24px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 14px 20px;
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .message-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.1);
+        }
+
+        .send-btn {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%);
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(255, 111, 0, 0.4);
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 111, 0, 0.5);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* タイピングインジケーター */
+        .typing-indicator {
+            display: none;
+            padding: 14px 18px;
+            background: var(--bot-bubble);
+            border-radius: 20px;
+            border-bottom-left-radius: 6px;
+            width: fit-content;
+            margin-left: 54px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .typing-indicator.show {
+            display: block;
+        }
+
+        .typing-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            margin-right: 4px;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; margin-right: 0; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+
+        /* レスポンシブ */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .logo {
+                font-size: 1.8rem;
+            }
+
+            .chat-messages {
+                padding: 16px;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+                padding: 12px 14px;
+                font-size: 0.9rem;
+            }
+
+            .message-avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 1.1rem;
+            }
+
+            .quick-actions {
+                padding: 12px 16px;
+            }
+
+            .quick-action-btn {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+
+            .input-container {
+                padding: 16px;
+            }
+
+            .message-input {
+                padding: 12px 16px;
+            }
+
+            .send-btn {
+                width: 46px;
+                height: 46px;
+            }
+        }
+
+        /* マークダウン風のスタイリング */
+        .message-bubble p {
+            margin-bottom: 8px;
+        }
+
+        .message-bubble p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ウェルカムメッセージ */
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .welcome-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        .welcome-title {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .welcome-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            max-width: 400px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <!-- プラン選択モーダル -->
+    <div class="plan-modal" id="planModal">
+        <div class="plan-modal-content" style="position: relative;">
+            <button class="plan-close-btn" id="planCloseBtn">×</button>
+            <h2>📋 あなたにぴったりのプランを作成</h2>
+            
+            <div class="plan-form-row">
+                <div class="plan-form-group">
+                    <label>パーク</label>
+                    <select id="planPark">
+                        <option value="tds">🌊 ディズニーシー</option>
+                        <option value="tdl">🏰 ディズニーランド</option>
+                    </select>
+                </div>
+            </div>
+            
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px;">タイプを選択：</p>
+            
+            <div id="planOptions">
+                <!-- JavaScriptで動的に追加 -->
+            </div>
+            
+            <button class="plan-submit-btn" id="planSubmitBtn">
+                ✨ プランを作成
+            </button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1 class="logo">🏰 Disney Guide Bot</h1>
+            <p class="subtitle">ディズニーリゾートのことなら何でも聞いてください！</p>
+            <div class="status-bar" id="statusBar">
+                <span class="status-indicator" id="llmStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-text">接続中...</span>
+                </span>
+                <button class="clear-btn" id="clearBtn" title="会話履歴をクリア">🗑️ リセット</button>
+            </div>
+        </header>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-message">
+                    <div class="welcome-icon">✨🐭✨</div>
+                    <h2 class="welcome-title">ようこそ！</h2>
+                    <p class="welcome-text">
+                        歩きながらでもすぐ使えます！<br>
+                        <strong>🚻トイレ 👶ベビーセンター 🏥救護室</strong><br>
+                        などのボタンをタップするか、何でも聞いてください！
+                    </p>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+            </div>
+
+            <div class="quick-actions" id="quickActions">
+                <!-- 動的に追加 -->
+            </div>
+
+            <div class="input-container">
+                <input type="text" 
+                       class="message-input" 
+                       id="messageInput" 
+                       placeholder="メッセージを入力..."
+                       autocomplete="off">
+                <button class="send-btn" id="sendBtn" aria-label="送信">
+                    ➤
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 星のエフェクトを生成
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 50;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                star.style.opacity = Math.random() * 0.5 + 0.3;
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // セッションID生成
+        const sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+        let llmAvailable = false;
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            loadQuickActions();
+            checkStatus();
+        });
+
+        // ステータスチェック
+        async function checkStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                const statusIndicator = document.getElementById('llmStatus');
+                const statusText = statusIndicator.querySelector('.status-text');
+                
+                llmAvailable = data.llm_available;
+                
+                if (llmAvailable) {
+                    statusIndicator.className = 'status-indicator active';
+                    statusText.textContent = `AI対話モード (${data.llm_model || 'Claude'})`;
+                } else {
+                    statusIndicator.className = 'status-indicator inactive';
+                    statusText.textContent = 'ルールベースモード';
+                }
+            } catch (error) {
+                console.error('Status check failed:', error);
+            }
+        }
+
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const quickActions = document.getElementById('quickActions');
+
+        // クイックアクションを読み込む
+        async function loadQuickActions() {
+            try {
+                const response = await fetch('/api/quick_actions');
+                const data = await response.json();
+                
+                // カテゴリ別にグループ化
+                const urgentActions = data.actions.filter(a => a.category === 'urgent');
+                const basicActions = data.actions.filter(a => a.category === 'basic' || a.category === 'tips');
+                const otherActions = data.actions.filter(a => a.category === 'fun' || a.category === 'facility');
+                
+                let html = '';
+                
+                // 緊急・よく使うボタン（大きく表示）
+                if (urgentActions.length > 0) {
+                    html += '<div class="quick-actions-row">';
+                    html += urgentActions.map(action => 
+                        `<button class="quick-action-btn urgent" data-message="${action.message}">${action.label}</button>`
+                    ).join('');
+                    html += '</div>';
+                }
+                
+                // プランボタン
+                const planActions = data.actions.filter(a => a.category === 'plan');
+                if (planActions.length > 0) {
+                    html += '<div class="quick-actions-row">';
+                    html += planActions.map(action => 
+                        `<button class="quick-action-btn plan" data-message="${action.message}">${action.label}</button>`
+                    ).join('');
+                    html += '</div>';
+                }
+                
+                // 基本ボタン
+                if (basicActions.length > 0) {
+                    html += '<div class="quick-actions-row">';
+                    html += basicActions.map(action => 
+                        `<button class="quick-action-btn" data-message="${action.message}">${action.label}</button>`
+                    ).join('');
+                    html += '</div>';
+                }
+                
+                // その他
+                if (otherActions.length > 0) {
+                    html += '<div class="quick-actions-row">';
+                    html += otherActions.map(action => 
+                        `<button class="quick-action-btn ${action.category}" data-message="${action.message}">${action.label}</button>`
+                    ).join('');
+                    html += '</div>';
+                }
+                
+                quickActions.innerHTML = html;
+
+                // イベントリスナーを追加
+                document.querySelectorAll('.quick-action-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        sendMessage(btn.dataset.message);
+                    });
+                });
+            } catch (error) {
+                console.error('Failed to load quick actions:', error);
+            }
+        }
+
+        // メッセージを送信
+        async function sendMessage(message = null) {
+            const text = message || messageInput.value.trim();
+            if (!text) return;
+
+            // ウェルカムメッセージを削除
+            const welcomeMessage = document.querySelector('.welcome-message');
+            if (welcomeMessage) {
+                welcomeMessage.remove();
+            }
+
+            // ユーザーメッセージを表示
+            appendMessage(text, 'user');
+            messageInput.value = '';
+
+            // タイピングインジケーターを表示
+            showTyping(true);
+            sendBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Session-ID': sessionId,
+                    },
+                    body: JSON.stringify({ message: text, use_llm: llmAvailable }),
+                });
+
+                const data = await response.json();
+                
+                // 少し遅延を入れてリアルな感じに
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                showTyping(false);
+                appendMessage(data.message, 'bot');
+            } catch (error) {
+                showTyping(false);
+                appendMessage('すみません、エラーが発生しました。もう一度お試しください。', 'bot');
+            }
+
+            sendBtn.disabled = false;
+        }
+
+        // メッセージを追加
+        function appendMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const avatar = sender === 'bot' ? '🏰' : '👤';
+            
+            // テキストをHTMLに変換（簡易的なマークダウン対応）
+            const formattedText = formatMessage(text);
+
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-bubble">${formattedText}</div>
+            `;
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // メッセージをフォーマット
+        function formatMessage(text) {
+            return text
+                // 太字
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                // 改行
+                .replace(/\n/g, '<br>')
+                // リスト項目
+                .replace(/^・(.+)$/gm, '<span style="display:block;margin:2px 0;">・$1</span>');
+        }
+
+        // タイピングインジケーター
+        function showTyping(show) {
+            typingIndicator.classList.toggle('show', show);
+            if (show) {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        // イベントリスナー
+        sendBtn.addEventListener('click', () => sendMessage());
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // クリアボタン
+        document.getElementById('clearBtn').addEventListener('click', async () => {
+            try {
+                await fetch('/api/clear_history', {
+                    method: 'POST',
+                    headers: {
+                        'X-Session-ID': sessionId,
+                    },
+                });
+                
+                // チャット画面をリセット
+                chatMessages.innerHTML = `
+                    <div class="welcome-message">
+                        <div class="welcome-icon">✨🐭✨</div>
+                        <h2 class="welcome-title">ようこそ！</h2>
+                        <p class="welcome-text">
+                            歩きながらでもすぐ使えます！<br>
+                            <strong>🚻トイレ 👶ベビーセンター 🏥救護室</strong><br>
+                            などのボタンをタップするか、何でも聞いてください！
+                        </p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Failed to clear history:', error);
+            }
+        });
+
+        // 入力フォーカス
+        messageInput.focus();
+
+        // プランモーダル関連
+        const planModal = document.getElementById('planModal');
+        const planCloseBtn = document.getElementById('planCloseBtn');
+        const planSubmitBtn = document.getElementById('planSubmitBtn');
+        const planOptionsContainer = document.getElementById('planOptions');
+        let selectedUserType = 'beginner';
+
+        // プランモーダルを開く
+        async function openPlanModal() {
+            // ユーザータイプを取得
+            try {
+                const response = await fetch('/api/plan/user_types');
+                const data = await response.json();
+                
+                planOptionsContainer.innerHTML = data.user_types.map(ut => `
+                    <div class="plan-option ${ut.id === 'beginner' ? 'selected' : ''}" data-type="${ut.id}">
+                        <h3>${getTypeEmoji(ut.id)} ${ut.name}</h3>
+                        <p>${ut.description}</p>
+                    </div>
+                `).join('');
+                
+                // オプション選択イベント
+                document.querySelectorAll('.plan-option').forEach(opt => {
+                    opt.addEventListener('click', () => {
+                        document.querySelectorAll('.plan-option').forEach(o => o.classList.remove('selected'));
+                        opt.classList.add('selected');
+                        selectedUserType = opt.dataset.type;
+                    });
+                });
+                
+            } catch (error) {
+                console.error('Failed to load user types:', error);
+            }
+            
+            planModal.classList.add('show');
+        }
+
+        function getTypeEmoji(type) {
+            const emojis = {
+                'beginner': '🌟',
+                'thrill_seeker': '🎢',
+                'family_with_kids': '👨‍👩‍👧',
+                'fantasy_springs_focus': '❄️',
+                'efficient': '⚡',
+                'relaxed': '☕',
+                'couple': '💕'
+            };
+            return emojis[type] || '📋';
+        }
+
+        // プランモーダルを閉じる
+        planCloseBtn.addEventListener('click', () => {
+            planModal.classList.remove('show');
+        });
+
+        planModal.addEventListener('click', (e) => {
+            if (e.target === planModal) {
+                planModal.classList.remove('show');
+            }
+        });
+
+        // プラン生成
+        planSubmitBtn.addEventListener('click', async () => {
+            const park = document.getElementById('planPark').value;
+            
+            planModal.classList.remove('show');
+            
+            // ウェルカムメッセージを削除
+            const welcomeMessage = document.querySelector('.welcome-message');
+            if (welcomeMessage) {
+                welcomeMessage.remove();
+            }
+            
+            // ユーザーメッセージを表示
+            const parkName = park === 'tdl' ? 'ディズニーランド' : 'ディズニーシー';
+            const typeName = document.querySelector('.plan-option.selected h3')?.textContent || '';
+            appendMessage(`${parkName}で${typeName}のプランを作って`, 'user');
+            
+            // タイピングインジケーター
+            showTyping(true);
+            sendBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/plan/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        park: park,
+                        user_type: selectedUserType
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+                showTyping(false);
+                
+                if (data.success) {
+                    appendMessage(data.formatted_text, 'bot');
+                } else {
+                    appendMessage('プランの生成に失敗しました。もう一度お試しください。', 'bot');
+                }
+            } catch (error) {
+                showTyping(false);
+                appendMessage('エラーが発生しました。もう一度お試しください。', 'bot');
+            }
+            
+            sendBtn.disabled = false;
+        });
+
+        // クイックアクションでプランボタンをクリックした場合
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('quick-action-btn') && e.target.classList.contains('plan')) {
+                e.preventDefault();
+                openPlanModal();
+            }
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,410 @@
+{
+  "restaurants": {
+    "tokyo_disney_land": {
+      "table_service": [
+        {
+          "name": "ブルーバイユー・レストラン",
+          "name_en": "Blue Bayou Restaurant",
+          "area": "adventureland",
+          "cuisine": "クレオール料理",
+          "price_range": "¥3,000〜¥5,000",
+          "priority_seating": true,
+          "description": "カリブの海賊の中にある高級レストラン。幻想的な雰囲気の中でクレオール料理を楽しめる",
+          "recommended_menu": ["ブイヤベース", "ステーキ", "コースメニュー"],
+          "tips": [
+            "予約困難な人気店",
+            "カリブの海賊のボートが目の前を通る",
+            "記念日やデートにおすすめ"
+          ],
+          "atmosphere": "ロマンチック",
+          "seating_capacity": 180
+        },
+        {
+          "name": "れすとらん北齋",
+          "name_en": "Restaurant Hokusai",
+          "area": "world_bazaar",
+          "cuisine": "和食",
+          "price_range": "¥1,500〜¥2,500",
+          "priority_seating": true,
+          "description": "葛飾北斎の絵が飾られた和食レストラン",
+          "recommended_menu": ["天ぷら膳", "うな重", "季節の御膳"],
+          "tips": [
+            "和食が恋しくなったらここ",
+            "店内に北斎の絵が飾られている"
+          ]
+        },
+        {
+          "name": "イーストサイド・カフェ",
+          "name_en": "Eastside Cafe",
+          "area": "world_bazaar",
+          "cuisine": "パスタ",
+          "price_range": "¥1,500〜¥2,500",
+          "priority_seating": true,
+          "description": "本格的なパスタを楽しめるイタリアンレストラン",
+          "recommended_menu": ["シーフードパスタ", "ミートソースパスタ", "季節のパスタ"],
+          "tips": [
+            "パスタが美味しい",
+            "落ち着いた雰囲気"
+          ]
+        },
+        {
+          "name": "ザ・ダイヤモンドホースシュー",
+          "name_en": "The Diamond Horseshoe",
+          "area": "westernland",
+          "cuisine": "アメリカン",
+          "price_range": "¥2,500〜¥4,000",
+          "priority_seating": true,
+          "show_restaurant": true,
+          "description": "ショーを見ながら食事ができるエンターテイメントレストラン",
+          "tips": [
+            "ショー付きなので予約必須",
+            "子供も大人も楽しめる"
+          ]
+        },
+        {
+          "name": "ポリネシアンテラス・レストラン",
+          "name_en": "Polynesian Terrace Restaurant",
+          "area": "adventureland",
+          "cuisine": "ポリネシアン",
+          "price_range": "¥2,500〜¥4,000",
+          "priority_seating": true,
+          "show_restaurant": true,
+          "description": "リロ＆スティッチのショーを見ながら食事ができる",
+          "tips": [
+            "ショー付き、子供に大人気",
+            "予約必須"
+          ]
+        }
+      ],
+      "quick_service": [
+        {
+          "name": "クイーン・オブ・ハートのバンケットホール",
+          "name_en": "Queen of Hearts Banquet Hall",
+          "area": "fantasyland",
+          "cuisine": "洋食",
+          "price_range": "¥1,000〜¥2,000",
+          "mobile_order": true,
+          "description": "不思議の国のアリスの世界観が楽しめるレストラン",
+          "recommended_menu": ["ハンバーグ", "チキン", "キッズメニュー"],
+          "tips": [
+            "店内の装飾がフォトジェニック",
+            "ハートの女王の城がモチーフ",
+            "モバイルオーダー対応で便利"
+          ]
+        },
+        {
+          "name": "グランマ・サラのキッチン",
+          "name_en": "Grandma Sara's Kitchen",
+          "area": "critter_country",
+          "cuisine": "アメリカン",
+          "price_range": "¥800〜¥1,500",
+          "mobile_order": true,
+          "description": "おばあちゃんの家庭料理がコンセプト",
+          "recommended_menu": ["オムライス", "ドリア", "キッズメニュー"],
+          "tips": [
+            "オムライスが人気",
+            "温かみのある雰囲気"
+          ]
+        },
+        {
+          "name": "ハングリーベア・レストラン",
+          "name_en": "Hungry Bear Restaurant",
+          "area": "westernland",
+          "cuisine": "カレー",
+          "price_range": "¥800〜¥1,500",
+          "mobile_order": true,
+          "description": "カレーライスが楽しめる大型レストラン",
+          "recommended_menu": ["ポークカレー", "チキンカレー", "お子様カレー"],
+          "tips": [
+            "カレーが食べたくなったらここ",
+            "テラス席もあり"
+          ]
+        },
+        {
+          "name": "トゥモローランド・テラス",
+          "name_en": "Tomorrowland Terrace",
+          "area": "tomorrowland",
+          "cuisine": "ハンバーガー",
+          "price_range": "¥800〜¥1,500",
+          "mobile_order": true,
+          "description": "ハンバーガーやホットドッグが楽しめる",
+          "recommended_menu": ["チーズバーガー", "ホットドッグ"],
+          "tips": [
+            "手軽に食べられる",
+            "席数が多い"
+          ]
+        },
+        {
+          "name": "プラズマ・レイズ・ダイナー",
+          "name_en": "Plazma Ray's Diner",
+          "area": "tomorrowland",
+          "cuisine": "ライスボウル",
+          "price_range": "¥800〜¥1,500",
+          "mobile_order": true,
+          "description": "近未来的な雰囲気でライスボウルが楽しめる",
+          "recommended_menu": ["チキンライスボウル", "ビーフライスボウル"]
+        }
+      ],
+      "snacks_drinks": [
+        {
+          "name": "スウィートハート・カフェ",
+          "area": "world_bazaar",
+          "type": "パン・スナック",
+          "recommended": ["ミッキーパン", "季節のパン", "コーヒー"],
+          "tips": ["朝食にもおすすめ", "パンの種類が豊富"]
+        },
+        {
+          "name": "リフレッシュメントコーナー",
+          "area": "world_bazaar",
+          "type": "軽食",
+          "recommended": ["ホットドッグ", "チュロス"],
+          "tips": ["手軽に食べ歩き"]
+        },
+        {
+          "name": "ザ・ガゼーボ",
+          "area": "fantasyland",
+          "type": "スナック",
+          "recommended": ["ポップコーン", "チュロス"],
+          "tips": ["ポップコーンバケットが買える"]
+        }
+      ],
+      "popcorn_stands": [
+        {"location": "トゥモローランド", "flavor": "キャラメル"},
+        {"location": "ファンタジーランド", "flavor": "ミルクチョコレート"},
+        {"location": "ウエスタンランド", "flavor": "バーベキュー"},
+        {"location": "アドベンチャーランド", "flavor": "カレー"},
+        {"location": "トゥーンタウン", "flavor": "ストロベリー"}
+      ]
+    },
+    "tokyo_disney_sea": {
+      "table_service": [
+        {
+          "name": "マゼランズ",
+          "name_en": "Magellan's",
+          "area": "mediterranean_harbor",
+          "cuisine": "フレンチ・コース料理",
+          "price_range": "¥5,000〜¥10,000",
+          "priority_seating": true,
+          "description": "東京ディズニーシー最高級のレストラン。地球儀の下で優雅なコース料理を",
+          "recommended_menu": ["コースメニュー", "アラカルト"],
+          "tips": [
+            "パーク内最高級のレストラン",
+            "記念日・デートに最適",
+            "ドレスコードはスマートカジュアル推奨"
+          ],
+          "atmosphere": "エレガント"
+        },
+        {
+          "name": "リストランテ・ディ・カナレット",
+          "name_en": "Ristorante di Canaletto",
+          "area": "mediterranean_harbor",
+          "cuisine": "イタリアン",
+          "price_range": "¥2,500〜¥4,000",
+          "priority_seating": true,
+          "description": "本格イタリアンが楽しめるヴェネツィアのレストラン",
+          "recommended_menu": ["パスタ", "ピザ", "リゾット"],
+          "tips": [
+            "運河を眺めながら食事できる",
+            "ゴンドラが通るのを見られることも"
+          ]
+        },
+        {
+          "name": "S.S.コロンビア・ダイニングルーム",
+          "name_en": "S.S. Columbia Dining Room",
+          "area": "american_waterfront",
+          "cuisine": "アメリカン・グリル",
+          "price_range": "¥3,000〜¥5,000",
+          "priority_seating": true,
+          "description": "豪華客船S.S.コロンビア号内のダイニング",
+          "recommended_menu": ["ステーキ", "シーフード", "コースメニュー"],
+          "tips": [
+            "船内の雰囲気が素晴らしい",
+            "窓から港が見える"
+          ]
+        },
+        {
+          "name": "テディ・ルーズヴェルト・ラウンジ",
+          "name_en": "Teddy Roosevelt Lounge",
+          "area": "american_waterfront",
+          "cuisine": "バー・ラウンジ",
+          "price_range": "¥1,500〜¥3,000",
+          "priority_seating": true,
+          "description": "S.S.コロンビア号内の落ち着いたバーラウンジ",
+          "recommended_menu": ["カクテル", "ワイン", "軽食"],
+          "tips": [
+            "大人向けの落ち着いた空間",
+            "アルコールあり",
+            "夜景を見ながらゆっくりできる"
+          ]
+        },
+        {
+          "name": "レストラン櫻",
+          "name_en": "Restaurant Sakura",
+          "area": "american_waterfront",
+          "cuisine": "和食",
+          "price_range": "¥2,000〜¥3,500",
+          "priority_seating": true,
+          "description": "和食が楽しめるレストラン",
+          "recommended_menu": ["天ぷら", "御膳メニュー", "季節の料理"],
+          "tips": [
+            "和食が恋しくなったらここ",
+            "落ち着いた雰囲気"
+          ]
+        }
+      ],
+      "quick_service": [
+        {
+          "name": "ヴォルケイニア・レストラン",
+          "name_en": "Vulcania Restaurant",
+          "area": "mysterious_island",
+          "cuisine": "中華",
+          "price_range": "¥1,000〜¥1,800",
+          "mobile_order": true,
+          "description": "火山の中にある中華レストラン",
+          "recommended_menu": ["餃子", "麻婆豆腐", "チャーハン"],
+          "tips": [
+            "センター・オブ・ジ・アースの近く",
+            "中華が食べたくなったらここ"
+          ]
+        },
+        {
+          "name": "カスバ・フードコート",
+          "name_en": "Casbah Food Court",
+          "area": "arabian_coast",
+          "cuisine": "カレー",
+          "price_range": "¥1,000〜¥1,500",
+          "mobile_order": true,
+          "description": "本格カレーが楽しめるフードコート",
+          "recommended_menu": ["チキンカレー", "シーフードカレー", "ナン"],
+          "tips": [
+            "カレーが美味しい",
+            "席数が多い"
+          ]
+        },
+        {
+          "name": "セバスチャンのカリプソキッチン",
+          "name_en": "Sebastian's Calypso Kitchen",
+          "area": "mermaid_lagoon",
+          "cuisine": "シーフード・ピザ",
+          "price_range": "¥800〜¥1,500",
+          "mobile_order": true,
+          "description": "海底をイメージしたレストラン",
+          "recommended_menu": ["ピザ", "シーフード"],
+          "tips": [
+            "マーメイドラグーン内で涼しい",
+            "子供向けメニューも充実"
+          ]
+        },
+        {
+          "name": "ザンビーニ・ブラザーズ・リストランテ",
+          "name_en": "Zambini Brothers' Ristorante",
+          "area": "mediterranean_harbor",
+          "cuisine": "パスタ・ピザ",
+          "price_range": "¥1,000〜¥1,800",
+          "mobile_order": true,
+          "description": "気軽にイタリアンが楽しめる",
+          "recommended_menu": ["パスタ", "ピザ"],
+          "tips": [
+            "テラス席からハーバーが見える",
+            "ハーバーショーの時間は混雑"
+          ]
+        },
+        {
+          "name": "ケープコッド・クックオフ",
+          "name_en": "Cape Cod Cook-Off",
+          "area": "american_waterfront",
+          "cuisine": "ハンバーガー",
+          "price_range": "¥800〜¥1,500",
+          "mobile_order": true,
+          "description": "ダッフィーのショーが見られるレストラン",
+          "recommended_menu": ["ハンバーガー", "チキン"],
+          "tips": [
+            "ダッフィーたちのショーが見られる",
+            "ショーを見ながら食事可能"
+          ]
+        }
+      ],
+      "fantasy_springs_restaurants": [
+        {
+          "name": "ロイヤルバンケット・オブ・アレンデール",
+          "name_en": "Royal Banquet of Arendelle",
+          "area": "fantasy_springs",
+          "theme": "アナと雪の女王",
+          "cuisine": "北欧料理",
+          "price_range": "¥3,000〜¥5,000",
+          "priority_seating": true,
+          "description": "アレンデール城内の豪華レストラン。アナとエルサの世界観で食事",
+          "tips": [
+            "予約困難な人気店",
+            "ファンタジースプリングス内",
+            "アナ雪ファン必見"
+          ]
+        },
+        {
+          "name": "スナグリーダックリング",
+          "name_en": "Snuggly Duckling",
+          "area": "fantasy_springs",
+          "theme": "塔の上のラプンツェル",
+          "cuisine": "アメリカン・ビストロ",
+          "price_range": "¥1,500〜¥2,500",
+          "description": "映画に登場する酒場「スナグリーダックリング」がモチーフ",
+          "tips": [
+            "映画の再現度が高い",
+            "ラプンツェルファン必見"
+          ]
+        },
+        {
+          "name": "ラ・タベルナ",
+          "area": "fantasy_springs",
+          "cuisine": "地中海料理",
+          "price_range": "¥1,500〜¥2,500",
+          "description": "地中海料理が楽しめるカジュアルレストラン"
+        }
+      ],
+      "popcorn_stands": [
+        {"location": "メディテレーニアンハーバー", "flavor": "ミルクティー"},
+        {"location": "アメリカンウォーターフロント", "flavor": "ガーリックシュリンプ"},
+        {"location": "ロストリバーデルタ", "flavor": "スパイシー"},
+        {"location": "マーメイドラグーン", "flavor": "ストロベリー"},
+        {"location": "アラビアンコースト", "flavor": "カレー"}
+      ]
+    },
+    "reservation_tips": {
+      "priority_seating": {
+        "description": "対象レストランの事前予約サービス",
+        "booking_start": "利用日の1ヶ月前10:00から",
+        "same_day_online": "当日9:00から",
+        "tips": [
+          "人気店は予約開始と同時に埋まる",
+          "10:00ちょうどにアクセス",
+          "複数のレストランで候補を持っておく",
+          "キャンセル待ちを狙う（前日〜当日にキャンセル出ることも）"
+        ]
+      },
+      "mobile_order": {
+        "description": "レストランの料理を事前注文し、指定時間に受け取れるサービス",
+        "tips": [
+          "昼食は11時前に注文しておくと混雑回避",
+          "受け取り時間を選べる",
+          "支払いはクレジットカード",
+          "アプリで簡単に注文可能"
+        ]
+      }
+    },
+    "dietary_restrictions": {
+      "allergen_info_url": "https://fsp.tokyodisneyresort.jp/",
+      "available_options": [
+        "低アレルゲンメニュー（対応レストランあり）",
+        "アレルゲン情報はメニューに記載",
+        "キャストに相談可能"
+      ],
+      "halal": "ハラール対応メニューは限定的。事前に確認推奨",
+      "vegetarian": "ベジタリアンメニューは一部対応。サラダやパスタなど",
+      "vegan": "完全ビーガン対応は限定的"
+    }
+  },
+  "last_updated": "2025-12-22"
+}
+
+
+

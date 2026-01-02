@@ -1,0 +1,797 @@
+{
+  "last_updated": "2025-12-23 06:33:08",
+  "closures": [
+    {
+      "attraction_name": "スイスファミリー・ツリーハウス",
+      "park": "tdl",
+      "start_date": "2022-04-01",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "グーフィーのペイント＆プレイハウス",
+      "park": "tdl",
+      "start_date": "2025-10-08",
+      "end_date": "2025-12-26",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "イッツ・ア・スモールワールド",
+      "park": "tdl",
+      "start_date": "2025-11-27",
+      "end_date": "2025-12-26",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "空飛ぶダンボ",
+      "park": "tdl",
+      "start_date": "2026-01-05",
+      "end_date": "2026-07-31",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "ピノキオの冒険旅行",
+      "park": "tdl",
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-19",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "ホーンテッドマンション",
+      "park": "tdl",
+      "start_date": "2026-01-13",
+      "end_date": "2026-02-18",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "スプラッシュ・マウンテン",
+      "park": "tdl",
+      "start_date": "2026-01-14",
+      "end_date": "2026-02-12",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "ジャングルクルーズ：ワイルドライフ・エクスペディション",
+      "park": "tdl",
+      "start_date": "2026-01-19",
+      "end_date": "2026-02-19",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "ミッキーのフィルハーマジック",
+      "park": "tdl",
+      "start_date": "2026-02-20",
+      "end_date": "2026-03-23",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "美女と野獣“魔法のものがたり”",
+      "park": "tdl",
+      "start_date": "2026-02-27",
+      "end_date": "2026-03-09",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "ロジャーラビットのカートゥーンスピン",
+      "park": "tdl",
+      "start_date": "2026-02-27",
+      "end_date": "2026-03-30",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "ピーターパン空の旅",
+      "park": "tdl",
+      "start_date": "2026-03-24",
+      "end_date": "2026-05-22",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "ミニーの家",
+      "park": "tdl",
+      "start_date": "2026-04-01",
+      "end_date": "2026-04-14",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "蒸気船マークトウェイン号",
+      "park": "tdl",
+      "start_date": "2026-04-22",
+      "end_date": "2026-05-21",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "カリブの海賊",
+      "park": "tdl",
+      "start_date": "2026-05-11",
+      "end_date": "2026-06-17",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "ビッグサンダー・マウンテン",
+      "park": "tdl",
+      "start_date": "2026-05-22",
+      "end_date": "2026-06-15",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "ピノキオの冒険旅行",
+      "park": "tdl",
+      "start_date": "2026-06-08",
+      "end_date": "2026-06-26",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "イッツ・ア・スモールワールド",
+      "park": "tdl",
+      "start_date": "2026-06-29",
+      "end_date": "2026-08-03",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "プーさんのハニーハント",
+      "park": "tdl",
+      "start_date": "2026-06-30",
+      "end_date": "2026-08-28",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "レッツ・パーティグラ！",
+      "park": "tdl",
+      "start_date": "2020-07-01",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "スカイ・フル・オブ・カラーズ",
+      "park": "tdl",
+      "start_date": "2025-11-10",
+      "end_date": "2025-12-25",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "スカイ・フル・オブ・カラーズ",
+      "park": "tdl",
+      "start_date": "2025-12-26",
+      "end_date": "2026-01-12",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "東京ディズニーランド・エレクトリカルパレード・ドリームライツ",
+      "park": "tdl",
+      "start_date": "2026-01-09",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "ニューデイ、ニュードリームス",
+      "park": "tdl",
+      "start_date": "2026-01-09",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "東京ディズニーランド・エレクトリカルパレード・ドリームライツ",
+      "park": "tdl",
+      "start_date": "2026-01-23",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "スカイ・フル・オブ・カラーズ",
+      "park": "tdl",
+      "start_date": "2026-01-23",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "東京ディズニーランド・エレクトリカルパレード・ドリームライツ",
+      "park": "tdl",
+      "start_date": "2026-02-06",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "スカイ・フル・オブ・カラーズ",
+      "park": "tdl",
+      "start_date": "2026-02-06",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "東京ディズニーランド・エレクトリカルパレード・ドリームライツ",
+      "park": "tdl",
+      "start_date": "2026-02-20",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "スカイ・フル・オブ・カラーズ",
+      "park": "tdl",
+      "start_date": "2026-02-20",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "ザ・ダイヤモンド・バラエティマスター",
+      "park": "tdl",
+      "start_date": "2026-04-01",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "ディズニー・ハーモニー・イン・カラー",
+      "park": "tdl",
+      "start_date": "2026-04-08",
+      "end_date": "2026-05-16",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "ミッキーのマジカルミュージックワールド",
+      "park": "tdl",
+      "start_date": "2026-05-17",
+      "end_date": "2026-06-04",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "ミッキーの家とミート・ミッキー",
+      "park": "tdl",
+      "start_date": "2026-01-12",
+      "end_date": "2026-01-13",
+      "reason": "seasonal",
+      "note": "カテゴリ: キャラクターグリーティング"
+    },
+    {
+      "attraction_name": "ウエスタンランド写真館",
+      "park": "tdl",
+      "start_date": "2020-07-01",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: ショップ"
+    },
+    {
+      "attraction_name": "スプラッシュダウン・フォト",
+      "park": "tdl",
+      "start_date": "2020-07-01",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: ショップ"
+    },
+    {
+      "attraction_name": "コズミック・エンカウンター",
+      "park": "tdl",
+      "start_date": "2025-11-04",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: ショップ"
+    },
+    {
+      "attraction_name": "キャリッジハウス・リフレッシュメント",
+      "park": "tdl",
+      "start_date": "2020-07-01",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "フードブース（アドベンチャーランド側）",
+      "park": "tdl",
+      "start_date": "2020-07-01",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "ポッピングポッド",
+      "park": "tdl",
+      "start_date": "2024-11-01",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "ソフトランディング",
+      "park": "tdl",
+      "start_date": "2025-11-01",
+      "end_date": "2026-03-31",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "スクウィーザーズ・トロピカル・ジュースバー",
+      "park": "tdl",
+      "start_date": "2025-11-11",
+      "end_date": "2025-12-25",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "フレッシュフルーツオアシス",
+      "park": "tdl",
+      "start_date": "2025-12-01",
+      "end_date": "2026-02-28",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "グランマ・サラのキッチン",
+      "park": "tdl",
+      "start_date": "2026-01-05",
+      "end_date": "2026-03-31",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "ラケッティのラクーンサルーン",
+      "park": "tdl",
+      "start_date": "2026-01-05",
+      "end_date": "2026-04-14",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "イーストサイド・カフェ",
+      "park": "tdl",
+      "start_date": "2026-01-15",
+      "end_date": "2026-01-29",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "ビレッジペイストリー",
+      "park": "tdl",
+      "start_date": "2026-02-02",
+      "end_date": "2026-02-15",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "ザ・ダイヤモンドホースシュー",
+      "park": "tdl",
+      "start_date": "2026-04-01",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "プラザパビリオン・レストラン",
+      "park": "tdl",
+      "start_date": "2026-04-01",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "ペコスビル・カフェ",
+      "park": "tdl",
+      "start_date": "2026-04-01",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "ゲストリレーション・ウインドウ（パーク内）",
+      "park": "tdl",
+      "start_date": "2020-10-01",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: サービス施設"
+    },
+    {
+      "attraction_name": "イーストゲート・レセプション",
+      "park": "tdl",
+      "start_date": "2021-01-04",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: サービス施設"
+    },
+    {
+      "attraction_name": "パークインフォメーションボード",
+      "park": "tdl",
+      "start_date": "2021-08-06",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: サービス施設"
+    },
+    {
+      "attraction_name": "マーメイドラグーンシアター",
+      "park": "tds",
+      "start_date": "2020-07-01",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "インディ・ジョーンズ®・アドベンチャー：クリスタルスカルの魔宮",
+      "park": "tds",
+      "start_date": "2025-08-18",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "アクアトピア",
+      "park": "tds",
+      "start_date": "2025-11-12",
+      "end_date": "2025-12-26",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "キャラバンカルーセル",
+      "park": "tds",
+      "start_date": "2026-01-15",
+      "end_date": "2026-01-26",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "レイジングスピリッツ",
+      "park": "tds",
+      "start_date": "2026-01-27",
+      "end_date": "2026-02-20",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "ディズニーシー・エレクトリックレールウェイ",
+      "park": "tds",
+      "start_date": "2026-01-27",
+      "end_date": "2026-03-10",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "ディズニーシー・エレクトリックレールウェイ",
+      "park": "tds",
+      "start_date": "2026-01-27",
+      "end_date": "2026-03-10",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "マジックランプシアター",
+      "park": "tds",
+      "start_date": "2026-02-25",
+      "end_date": "2026-03-16",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "ピーターパンのネバーランドアドベンチャー",
+      "park": "tds",
+      "start_date": "2026-03-02",
+      "end_date": "2026-03-06",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "シンドバッド・ストーリーブック・ヴォヤッジ",
+      "park": "tds",
+      "start_date": "2026-03-17",
+      "end_date": "2026-04-30",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "海底2万マイル",
+      "park": "tds",
+      "start_date": "2026-04-02",
+      "end_date": "2026-05-11",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "アナとエルサのフローズンジャーニー",
+      "park": "tds",
+      "start_date": "2026-05-12",
+      "end_date": "2026-06-03",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "ブローフィッシュ・バルーンレース",
+      "park": "tds",
+      "start_date": "2026-05-13",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "タートル・トーク",
+      "park": "tds",
+      "start_date": "2026-06-08",
+      "end_date": "2026-06-10",
+      "reason": "refurbishment",
+      "note": "カテゴリ: アトラクション"
+    },
+    {
+      "attraction_name": "スカイ・フル・オブ・カラーズ",
+      "park": "tds",
+      "start_date": "2025-11-10",
+      "end_date": "2025-12-25",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "スカイ・フル・オブ・カラーズ",
+      "park": "tds",
+      "start_date": "2025-12-26",
+      "end_date": "2026-01-12",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "ビリーヴ！～シー・オブ・ドリームス～",
+      "park": "tds",
+      "start_date": "2026-01-08",
+      "end_date": "2026-02-12",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "スカイ・フル・オブ・カラーズ",
+      "park": "tds",
+      "start_date": "2026-01-16",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "スカイ・フル・オブ・カラーズ",
+      "park": "tds",
+      "start_date": "2026-01-23",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "スカイ・フル・オブ・カラーズ",
+      "park": "tds",
+      "start_date": "2026-01-30",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "ビリーヴ！～シー・オブ・ドリームス～",
+      "park": "tds",
+      "start_date": "2026-02-13",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "スカイ・フル・オブ・カラーズ",
+      "park": "tds",
+      "start_date": "2026-02-13",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "ビリーヴ！～シー・オブ・ドリームス～",
+      "park": "tds",
+      "start_date": "2026-03-06",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "スカイ・フル・オブ・カラーズ",
+      "park": "tds",
+      "start_date": "2026-03-06",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "ビリーヴ！～シー・オブ・ドリームス～",
+      "park": "tds",
+      "start_date": "2026-04-10",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "スカイ・フル・オブ・カラーズ",
+      "park": "tds",
+      "start_date": "2026-04-10",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "ビリーヴ！～シー・オブ・ドリームス～",
+      "park": "tds",
+      "start_date": "2026-04-12",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "スカイ・フル・オブ・カラーズ",
+      "park": "tds",
+      "start_date": "2026-04-12",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "ビリーヴ！～シー・オブ・ドリームス～",
+      "park": "tds",
+      "start_date": "2026-04-24",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "スカイ・フル・オブ・カラーズ",
+      "park": "tds",
+      "start_date": "2026-04-24",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "ビリーヴ！～シー・オブ・ドリームス～",
+      "park": "tds",
+      "start_date": "2026-05-22",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "スカイ・フル・オブ・カラーズ",
+      "park": "tds",
+      "start_date": "2026-05-22",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: パレード/ショー"
+    },
+    {
+      "attraction_name": "エクスペディション・フォトアーカイヴ",
+      "park": "tds",
+      "start_date": "2025-08-18",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: ショップ"
+    },
+    {
+      "attraction_name": "ペドラーズ・アウトポスト",
+      "park": "tds",
+      "start_date": "2025-08-18",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: ショップ"
+    },
+    {
+      "attraction_name": "テディ・ルーズヴェルト・ラウンジ テラス席",
+      "park": "tds",
+      "start_date": "2025-11-01",
+      "end_date": "2026-04-07",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "ヴォルケイニア・レストラン",
+      "park": "tds",
+      "start_date": "2025-12-01",
+      "end_date": "2026-03-31",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "リフレッシュメント・ステーション",
+      "park": "tds",
+      "start_date": "2025-12-01",
+      "end_date": "2026-03-31",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "ノーチラスギャレー",
+      "park": "tds",
+      "start_date": "2026-01-05",
+      "end_date": "2026-03-25",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "カフェ・ポルトフィーノ",
+      "park": "tds",
+      "start_date": "2026-02-26",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "マンマ・ビスコッティーズ・ベーカリー",
+      "park": "tds",
+      "start_date": "2026-02-26",
+      "end_date": "未定",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "S.S.コロンビア・ダイニングルーム",
+      "park": "tds",
+      "start_date": "2026-03-21",
+      "end_date": "2026-04-07",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "テディ・ルーズヴェルト・ラウンジ",
+      "park": "tds",
+      "start_date": "2026-03-21",
+      "end_date": "2026-04-07",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "アレンデール・ロイヤルバンケット",
+      "park": "tds",
+      "start_date": "2026-04-01",
+      "end_date": "2026-04-03",
+      "reason": "refurbishment",
+      "note": "カテゴリ: レストラン"
+    },
+    {
+      "attraction_name": "団体チケットブース",
+      "park": "tds",
+      "start_date": "2020-07-01",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: サービス施設"
+    },
+    {
+      "attraction_name": "パークインフォメーションボード",
+      "park": "tds",
+      "start_date": "2021-08-06",
+      "end_date": "未定",
+      "reason": "seasonal",
+      "note": "カテゴリ: サービス施設"
+    }
+  ],
+  "_readme": {
+    "description": "ディズニーリゾート アトラクション休止情報",
+    "update_method": "scripts/update_closures.py を実行して公式サイトから取得",
+    "official_urls": {
+      "tdl": "https://www.tokyodisneyresort.jp/tdl/monthly/stop.html",
+      "tds": "https://www.tokyodisneyresort.jp/tds/monthly/stop.html"
+    }
+  }
+}

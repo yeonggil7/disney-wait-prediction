@@ -1,0 +1,22 @@
+{
+  "analysis_date": "20250703_112557",
+  "target_date": "2025年06月26日",
+  "total_table_rows": 37,
+  "time_slot_elements": 29,
+  "valid_time_slots_count": 8,
+  "valid_time_slots": [
+    "08:15",
+    "08:45",
+    "09:15",
+    "09:45",
+    "10:15",
+    "10:45",
+    "11:15",
+    "11:20"
+  ],
+  "empty_time_slots_count": 21,
+  "attraction_count": 42,
+  "achievement_status": "未達成",
+  "target_achieved": false,
+  "debug_file": "yosocal_complete_20250626_20250703_112557.html"
+}

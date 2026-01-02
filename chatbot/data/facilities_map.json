@@ -1,0 +1,406 @@
+{
+  "facilities": {
+    "tokyo_disney_land": {
+      "restrooms": [
+        {
+          "id": "tdl_wc_1",
+          "name": "ワールドバザール入口付近",
+          "area": "world_bazaar",
+          "landmark": "メインエントランス入ってすぐ右側",
+          "features": ["多機能トイレ", "おむつ替え"],
+          "crowded_level": "混みやすい"
+        },
+        {
+          "id": "tdl_wc_2",
+          "name": "ワールドバザール奥",
+          "area": "world_bazaar",
+          "landmark": "グランドエンポーリアム（大きなお土産屋）の近く",
+          "features": ["多機能トイレ"],
+          "crowded_level": "普通"
+        },
+        {
+          "id": "tdl_wc_3",
+          "name": "アドベンチャーランド入口",
+          "area": "adventureland",
+          "landmark": "カリブの海賊の手前",
+          "features": ["多機能トイレ", "おむつ替え"],
+          "crowded_level": "普通"
+        },
+        {
+          "id": "tdl_wc_4",
+          "name": "ウエスタンランド",
+          "area": "westernland",
+          "landmark": "ビッグサンダー・マウンテンの近く",
+          "features": ["多機能トイレ"],
+          "crowded_level": "空いている",
+          "tip": "穴場！比較的空いている"
+        },
+        {
+          "id": "tdl_wc_5",
+          "name": "クリッターカントリー",
+          "area": "critter_country",
+          "landmark": "スプラッシュ・マウンテン出口付近",
+          "features": ["多機能トイレ"],
+          "crowded_level": "空いている"
+        },
+        {
+          "id": "tdl_wc_6",
+          "name": "ファンタジーランド（美女と野獣エリア）",
+          "area": "fantasyland",
+          "landmark": "美女と野獣の城の近く",
+          "features": ["多機能トイレ", "おむつ替え"],
+          "crowded_level": "混みやすい"
+        },
+        {
+          "id": "tdl_wc_7",
+          "name": "ファンタジーランド（プーさん付近）",
+          "area": "fantasyland",
+          "landmark": "プーさんのハニーハントの横",
+          "features": ["多機能トイレ"],
+          "crowded_level": "普通"
+        },
+        {
+          "id": "tdl_wc_8",
+          "name": "トゥーンタウン",
+          "area": "toontown",
+          "landmark": "ロジャーラビットのカートゥーンスピン近く",
+          "features": ["多機能トイレ", "おむつ替え"],
+          "crowded_level": "普通"
+        },
+        {
+          "id": "tdl_wc_9",
+          "name": "トゥモローランド（スペースマウンテン側）",
+          "area": "tomorrowland",
+          "landmark": "スペース・マウンテンの手前",
+          "features": ["多機能トイレ"],
+          "crowded_level": "普通"
+        },
+        {
+          "id": "tdl_wc_10",
+          "name": "トゥモローランド（バズ側）",
+          "area": "tomorrowland",
+          "landmark": "バズ・ライトイヤーの近く",
+          "features": ["多機能トイレ"],
+          "crowded_level": "空いている",
+          "tip": "穴場！比較的空いている"
+        }
+      ],
+      "baby_center": {
+        "name": "ベビーセンター",
+        "area": "world_bazaar",
+        "landmark": "ワールドバザールを抜けて右側、救護室の隣",
+        "services": ["授乳室", "おむつ替え", "ミルク用お湯", "離乳食販売", "紙おむつ販売", "ベビーフード販売"],
+        "hours": "パーク開園〜閉園"
+      },
+      "first_aid": {
+        "name": "救護室（中央救護室）",
+        "area": "world_bazaar",
+        "landmark": "ワールドバザールを抜けて右側、ベビーセンターの隣",
+        "services": ["応急処置", "休憩", "AED"],
+        "tip": "体調が悪くなったらすぐに利用を"
+      },
+      "locker": [
+        {
+          "name": "コインロッカー（パーク入口）",
+          "location": "メインエントランス外側",
+          "sizes": ["小（300円）", "中（400円）", "大（500円）", "特大（700円）"],
+          "tip": "入園前に荷物を預けるのがおすすめ"
+        },
+        {
+          "name": "コインロッカー（ワールドバザール）",
+          "location": "ワールドバザール内",
+          "sizes": ["小", "中"],
+          "tip": "パーク内で預けたい時に便利"
+        }
+      ],
+      "stroller_rental": {
+        "name": "ベビーカー＆車イス・レンタル",
+        "location": "メインエントランス右側",
+        "items": [
+          {"name": "ベビーカー", "price": "1,000円/日", "note": "B型タイプ、1〜4歳向け"},
+          {"name": "車イス", "price": "500円/日"},
+          {"name": "電動カート", "price": "2,000円/日", "note": "要事前予約"}
+        ]
+      },
+      "smoking_area": [
+        {"name": "喫煙所", "location": "パーク外（メインエントランス左側）"}
+      ],
+      "atm": {
+        "name": "ATM",
+        "location": "ワールドバザール内（三井住友銀行）"
+      },
+      "lost_child": {
+        "name": "迷子センター",
+        "location": "ワールドバザール内（ベビーセンター付近）",
+        "tip": "迷子になったらここへ。迷子シールをもらっておくと安心"
+      }
+    },
+    "tokyo_disney_sea": {
+      "restrooms": [
+        {
+          "id": "tds_wc_1",
+          "name": "メインエントランス付近",
+          "area": "entrance",
+          "landmark": "入園ゲート入ってすぐ右側",
+          "features": ["多機能トイレ", "おむつ替え"],
+          "crowded_level": "混みやすい"
+        },
+        {
+          "id": "tds_wc_2",
+          "name": "メディテレーニアンハーバー（ソアリン側）",
+          "area": "mediterranean_harbor",
+          "landmark": "ソアリンの近く、ザンビーニ・ブラザーズ・リストランテ付近",
+          "features": ["多機能トイレ"],
+          "crowded_level": "普通"
+        },
+        {
+          "id": "tds_wc_3",
+          "name": "メディテレーニアンハーバー（ゴンドラ側）",
+          "area": "mediterranean_harbor",
+          "landmark": "ヴェネツィアン・ゴンドラ乗り場付近",
+          "features": ["多機能トイレ"],
+          "crowded_level": "普通"
+        },
+        {
+          "id": "tds_wc_4",
+          "name": "アメリカンウォーターフロント（タワテラ側）",
+          "area": "american_waterfront",
+          "landmark": "タワー・オブ・テラー近く",
+          "features": ["多機能トイレ", "おむつ替え"],
+          "crowded_level": "普通"
+        },
+        {
+          "id": "tds_wc_5",
+          "name": "アメリカンウォーターフロント（トイマニ側）",
+          "area": "american_waterfront",
+          "landmark": "トイ・ストーリー・マニア！付近",
+          "features": ["多機能トイレ"],
+          "crowded_level": "普通"
+        },
+        {
+          "id": "tds_wc_6",
+          "name": "アメリカンウォーターフロント（ケープコッド）",
+          "area": "american_waterfront",
+          "landmark": "ケープコッド・クックオフ近く（ダッフィーエリア）",
+          "features": ["多機能トイレ"],
+          "crowded_level": "空いている",
+          "tip": "穴場！ダッフィーグリーティング待ちでなければ空いている"
+        },
+        {
+          "id": "tds_wc_7",
+          "name": "ポートディスカバリー",
+          "area": "port_discovery",
+          "landmark": "ニモ＆フレンズ・シーライダー付近",
+          "features": ["多機能トイレ"],
+          "crowded_level": "空いている",
+          "tip": "穴場！比較的空いているエリア"
+        },
+        {
+          "id": "tds_wc_8",
+          "name": "ロストリバーデルタ",
+          "area": "lost_river_delta",
+          "landmark": "インディ・ジョーンズ・アドベンチャー近く",
+          "features": ["多機能トイレ", "おむつ替え"],
+          "crowded_level": "空いている",
+          "tip": "穴場！奥まった場所で空いていることが多い"
+        },
+        {
+          "id": "tds_wc_9",
+          "name": "ミステリアスアイランド",
+          "area": "mysterious_island",
+          "landmark": "センター・オブ・ジ・アース近く",
+          "features": ["多機能トイレ"],
+          "crowded_level": "普通"
+        },
+        {
+          "id": "tds_wc_10",
+          "name": "マーメイドラグーン",
+          "area": "mermaid_lagoon",
+          "landmark": "キング・トリトンのコンサート近く（屋内）",
+          "features": ["多機能トイレ", "おむつ替え"],
+          "crowded_level": "普通",
+          "tip": "屋内なので天候に左右されず快適"
+        },
+        {
+          "id": "tds_wc_11",
+          "name": "アラビアンコースト",
+          "area": "arabian_coast",
+          "landmark": "マジックランプシアター近く",
+          "features": ["多機能トイレ"],
+          "crowded_level": "普通"
+        },
+        {
+          "id": "tds_wc_12",
+          "name": "ファンタジースプリングス",
+          "area": "fantasy_springs",
+          "landmark": "ファンタジースプリングス入口付近",
+          "features": ["多機能トイレ", "おむつ替え"],
+          "crowded_level": "混みやすい",
+          "tip": "新エリアなので綺麗だが混雑しやすい"
+        }
+      ],
+      "baby_center": {
+        "name": "ベビーセンター",
+        "area": "mediterranean_harbor",
+        "landmark": "メディテレーニアンハーバー、マンマ・ビスコッティーズ・ベーカリー横",
+        "services": ["授乳室", "おむつ替え", "ミルク用お湯", "離乳食販売", "紙おむつ販売", "ベビーフード販売"],
+        "hours": "パーク開園〜閉園"
+      },
+      "first_aid": {
+        "name": "救護室（中央救護室）",
+        "area": "mediterranean_harbor",
+        "landmark": "メディテレーニアンハーバー、ベビーセンターの隣",
+        "services": ["応急処置", "休憩", "AED"],
+        "tip": "体調が悪くなったらすぐに利用を"
+      },
+      "locker": [
+        {
+          "name": "コインロッカー（パーク入口）",
+          "location": "メインエントランス外側",
+          "sizes": ["小（300円）", "中（400円）", "大（500円）", "特大（700円）"]
+        },
+        {
+          "name": "コインロッカー（パーク内）",
+          "location": "メディテレーニアンハーバー内",
+          "sizes": ["小", "中"]
+        }
+      ],
+      "stroller_rental": {
+        "name": "ベビーカー＆車イス・レンタル",
+        "location": "メインエントランス右側",
+        "items": [
+          {"name": "ベビーカー", "price": "1,000円/日", "note": "B型タイプ、1〜4歳向け"},
+          {"name": "車イス", "price": "500円/日"},
+          {"name": "電動カート", "price": "2,000円/日", "note": "要事前予約"}
+        ]
+      },
+      "smoking_area": [
+        {"name": "喫煙所", "location": "パーク外（メインエントランス左側）"}
+      ],
+      "atm": {
+        "name": "ATM",
+        "location": "メディテレーニアンハーバー内"
+      },
+      "lost_child": {
+        "name": "迷子センター",
+        "location": "メディテレーニアンハーバー（ベビーセンター付近）",
+        "tip": "迷子になったらここへ。迷子シールをもらっておくと安心"
+      }
+    },
+    "quick_answers": {
+      "restroom_tips": [
+        "トイレは入口付近・人気エリアは混みやすい",
+        "穴場は奥のエリア（ランド:ウエスタンランド、シー:ロストリバーデルタ）",
+        "パレード直前・直後は大混雑",
+        "アトラクション待機列を離れる前にトイレは済ませておく"
+      ],
+      "emergency_contacts": {
+        "park_emergency": "パーク内キャストに声をかけてください",
+        "lost_child": "迷子センターまたは近くのキャストへ",
+        "medical": "救護室へ（場所がわからなければキャストに聞く）"
+      }
+    }
+  },
+  "area_guide": {
+    "tokyo_disney_land": {
+      "world_bazaar": {
+        "name": "ワールドバザール",
+        "description": "メインエントランスを入ってすぐのショッピングエリア",
+        "landmarks": ["メインストリート", "シンデレラ城方向へまっすぐ"],
+        "nearby": ["お土産屋さん", "カフェ", "ベビーセンター", "救護室", "コインロッカー"]
+      },
+      "adventureland": {
+        "name": "アドベンチャーランド",
+        "description": "ジャングルや海賊の世界",
+        "landmarks": ["カリブの海賊", "ジャングルクルーズ"],
+        "nearby": ["ブルーバイユー・レストラン", "ポリネシアンテラス"]
+      },
+      "westernland": {
+        "name": "ウエスタンランド",
+        "description": "西部開拓時代のエリア",
+        "landmarks": ["ビッグサンダー・マウンテン", "蒸気船マークトウェイン号"],
+        "nearby": ["ハングリーベア・レストラン"]
+      },
+      "critter_country": {
+        "name": "クリッターカントリー",
+        "description": "森の動物たちの世界",
+        "landmarks": ["スプラッシュ・マウンテン"],
+        "nearby": ["グランマ・サラのキッチン"]
+      },
+      "fantasyland": {
+        "name": "ファンタジーランド",
+        "description": "おとぎ話の世界。美女と野獣エリアも含む",
+        "landmarks": ["シンデレラ城", "美女と野獣の城", "プーさんのハニーハント"],
+        "nearby": ["クイーン・オブ・ハートのバンケットホール"]
+      },
+      "toontown": {
+        "name": "トゥーンタウン",
+        "description": "ミッキーと仲間たちの街",
+        "landmarks": ["ミッキーの家", "ミニーの家"],
+        "nearby": ["ヒューイ・デューイ・ルーイのグッドタイム・カフェ"]
+      },
+      "tomorrowland": {
+        "name": "トゥモローランド",
+        "description": "未来の世界",
+        "landmarks": ["スペース・マウンテン", "バズ・ライトイヤー"],
+        "nearby": ["トゥモローランド・テラス"]
+      }
+    },
+    "tokyo_disney_sea": {
+      "mediterranean_harbor": {
+        "name": "メディテレーニアンハーバー",
+        "description": "南ヨーロッパの港町。パークの中心",
+        "landmarks": ["ソアリン", "ヴェネツィアン・ゴンドラ", "プロメテウス火山"],
+        "nearby": ["ザンビーニ・ブラザーズ・リストランテ", "ベビーセンター", "救護室"]
+      },
+      "american_waterfront": {
+        "name": "アメリカンウォーターフロント",
+        "description": "20世紀初頭のアメリカ",
+        "landmarks": ["タワー・オブ・テラー", "トイ・ストーリー・マニア！", "S.S.コロンビア号"],
+        "nearby": ["ケープコッド・クックオフ", "レストラン櫻"]
+      },
+      "port_discovery": {
+        "name": "ポートディスカバリー",
+        "description": "時空を超えたマリーナ",
+        "landmarks": ["ニモ＆フレンズ・シーライダー", "アクアトピア"],
+        "nearby": ["ホライズンベイ・レストラン"]
+      },
+      "lost_river_delta": {
+        "name": "ロストリバーデルタ",
+        "description": "中央アメリカのジャングル",
+        "landmarks": ["インディ・ジョーンズ・アドベンチャー", "レイジングスピリッツ"],
+        "nearby": ["ユカタン・ベースキャンプ・グリル"]
+      },
+      "mysterious_island": {
+        "name": "ミステリアスアイランド",
+        "description": "プロメテウス火山の島",
+        "landmarks": ["センター・オブ・ジ・アース", "海底2万マイル"],
+        "nearby": ["ヴォルケイニア・レストラン"]
+      },
+      "mermaid_lagoon": {
+        "name": "マーメイドラグーン",
+        "description": "リトル・マーメイドの海底王国（屋内エリアあり）",
+        "landmarks": ["キング・トリトンのコンサート", "アリエルのプレイグラウンド"],
+        "nearby": ["セバスチャンのカリプソキッチン"],
+        "tip": "屋内エリアは冷暖房完備で休憩に最適"
+      },
+      "arabian_coast": {
+        "name": "アラビアンコースト",
+        "description": "アラビアンナイトの世界",
+        "landmarks": ["マジックランプシアター", "シンドバッド・ストーリーブック・ヴォヤッジ"],
+        "nearby": ["カスバ・フードコート"]
+      },
+      "fantasy_springs": {
+        "name": "ファンタジースプリングス",
+        "description": "2024年オープンの最新エリア。アナ雪・ラプンツェル・ピーターパンの世界",
+        "landmarks": ["アナとエルサのフローズンジャーニー", "ラプンツェルのランタンフェスティバル", "ピーターパンのネバーランドアドベンチャー"],
+        "nearby": ["ロイヤルバンケット・オブ・アレンデール", "スナグリーダックリング"],
+        "access": "スタンバイパスまたはDPAが必要な場合あり"
+      }
+    }
+  },
+  "last_updated": "2025-12-22"
+}
+
+
+

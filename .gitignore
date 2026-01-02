@@ -1,0 +1,55 @@
+# 環境変数・機密情報
+.env
+.env.local
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+
+# 仮想環境
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ログファイル
+logs/
+*.log
+
+# 予測結果（サイズが大きいため）
+predictions_sea/
+predictions_land/
+predictions/
+
+# モデルファイル（サイズが大きいため）
+*.pkl
+*.joblib
+models/
+
+# データファイル
+# ※Disneyland/ と Disneysea/ は学習に必要なためコミット対象
+
+# 一時ファイル
+*.tmp
+*.temp
+
