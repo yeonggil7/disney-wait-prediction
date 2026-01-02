@@ -1,15 +1,15 @@
 name: 🎢 Daily TDR Wait Time Prediction
 
 on:
-  # 毎日 23:00 UTC = 日本時間 8:00 JST に実行
+  # 毎日 11:00 UTC = 日本時間 20:00 JST に実行（翌日の予測を投稿）
   schedule:
-    - cron: '0 23 * * *'
+    - cron: '0 11 * * *'
   
   # 手動実行も可能
   workflow_dispatch:
     inputs:
       date:
-        description: '予測日 (YYYY-MM-DD形式、空欄は今日)'
+        description: '予測日 (YYYY-MM-DD形式、空欄は明日)'
         required: false
         default: ''
 
@@ -58,10 +58,11 @@ jobs:
         run: |
           DATE_ARG="${{ github.event.inputs.date }}"
           if [ -z "$DATE_ARG" ]; then
-            DATE_ARG=$(date +%Y-%m-%d)
+            # 翌日の日付を取得
+            DATE_ARG=$(date -d "+1 day" +%Y-%m-%d)
           fi
           
-          echo "📅 予測日: $DATE_ARG"
+          echo "📅 予測日: $DATE_ARG（翌日分）"
           # アトラクション個別投稿はレート制限のため無効化
           # python daily_prediction.py --post --attractions --date "$DATE_ARG"
           python daily_prediction.py --post --date "$DATE_ARG"
