@@ -18,8 +18,8 @@ import numpy as np
 # 自動取得を試みる。失敗した場合は手動リストを使用
 # 手動で設定する場合: MANUAL_CLOSED_ATTRACTIONS_SEA に追加
 MANUAL_CLOSED_ATTRACTIONS_SEA = [
-    # 手動で休止中のアトラクションを追加する場合はここに記載
-    # 例: 'センターオブジアース',
+    # 無期限休止中のアトラクション
+    'インディージョーンズクリスタルスカルの謎',  # 2024年9月より無期限休止
 ]
 
 # 公式サイトから休止中アトラクションを自動取得
@@ -43,6 +43,15 @@ def get_closed_attractions(target_date=None, attraction_list=None):
     Returns:
         list: 休止中アトラクション名のリスト（予測システムの名前にマッピング済み）
     """
+    # 手動リスト（無期限休止など）は常に含める
+    closed_list = list(MANUAL_CLOSED_ATTRACTIONS_SEA)
+    
+    if MANUAL_CLOSED_ATTRACTIONS_SEA:
+        print(f"📋 無期限休止アトラクション: {len(MANUAL_CLOSED_ATTRACTIONS_SEA)}件")
+        for name in MANUAL_CLOSED_ATTRACTIONS_SEA:
+            print(f"   - {name}")
+    
+    # 自動取得も試みる
     if AUTO_FETCH_CLOSED:
         try:
             auto_closed = get_closed_attractions_sea(target_date)
@@ -50,28 +59,22 @@ def get_closed_attractions(target_date=None, attraction_list=None):
                 print(f"📡 公式サイトから休止情報を取得: {len(auto_closed)}件")
                 
                 # 予測システムの名前にマッピング
-                mapped_closed = []
                 for name in auto_closed:
                     if attraction_list and normalize_attraction_name:
                         mapped = normalize_attraction_name(name, attraction_list)
-                        if mapped:
-                            mapped_closed.append(mapped)
+                        if mapped and mapped not in closed_list:
+                            closed_list.append(mapped)
                             print(f"   - {name} → {mapped}")
-                        else:
+                        elif not mapped:
                             print(f"   - {name} (マッピングなし)")
                     else:
-                        mapped_closed.append(name)
-                        print(f"   - {name}")
-                
-                return mapped_closed
+                        if name not in closed_list:
+                            closed_list.append(name)
+                            print(f"   - {name}")
         except Exception as e:
             print(f"⚠️ 自動取得失敗: {e}")
     
-    if MANUAL_CLOSED_ATTRACTIONS_SEA:
-        print(f"📋 手動リストから休止情報を使用: {len(MANUAL_CLOSED_ATTRACTIONS_SEA)}件")
-        return MANUAL_CLOSED_ATTRACTIONS_SEA
-    
-    return []
+    return closed_list
 
 # 予測システムをインポート（最新版を優先）
 try:

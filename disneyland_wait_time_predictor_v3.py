@@ -1146,33 +1146,66 @@ class DisneyLandWaitTimePredictorV3:
         # ハイブリッド予測: 前週・前前週の実データで補正
         df = self.apply_weekly_adjustment(df, date)
         
+        # アトラクション別バイアス補正
+        df = self.apply_bias_correction(df, date)
+        
         return df[['date', 'time', 'attraction_name', 'predicted_wait_time', 
                   'temperature', 'is_rainy', 'weather_impact', 'is_weekend',
                   'is_holiday', 'weekday_crowding', 'special_date_crowding']]
     
-    def apply_weekly_adjustment(self, df, target_date):
-        """前週・前前週の実データで予測を補正"""
+    def _load_day_actual_data(self, date_str, data_dir="Disneyland", park_prefix="disneyland"):
+        """指定日の実績データを読み込み（daily → monthly のフォールバック付き）"""
         import os
         import glob
         
+        # 1. dailyファイルを試行
+        daily_file = os.path.join(data_dir, f"{park_prefix}_daily_{date_str}.csv")
+        if os.path.exists(daily_file):
+            try:
+                data = pd.read_csv(daily_file)
+                data['wait_time'] = pd.to_numeric(data['wait_time'], errors='coerce')
+                result = data[data['wait_time'] > 0].groupby(
+                    ['time', 'attraction_name']
+                )['wait_time'].mean().reset_index()
+                if len(result) > 0:
+                    return result
+            except Exception:
+                pass
+        
+        # 2. monthlyファイルからフォールバック
+        year_month = date_str[:7].replace('-', '_')
+        monthly_files = sorted(glob.glob(
+            os.path.join(data_dir, f"{park_prefix}_monthly_{year_month}*.csv")
+        ))
+        for mf in reversed(monthly_files):
+            try:
+                data = pd.read_csv(mf)
+                data['wait_time'] = pd.to_numeric(data['wait_time'], errors='coerce')
+                day_data = data[(data['date'] == date_str) & (data['wait_time'] > 0)]
+                if len(day_data) > 0:
+                    result = day_data.groupby(
+                        ['time', 'attraction_name']
+                    )['wait_time'].mean().reset_index()
+                    return result
+            except Exception:
+                continue
+        
+        return None
+
+    def apply_weekly_adjustment(self, df, target_date):
+        """前週・前前週の実データで予測を補正（改善版）"""
         target = pd.to_datetime(target_date)
         target_weekday = target.weekday()
         
-        # 祝日・特別日判定
         is_special = (
-            (target.month == 12 and target.day >= 15) or  # クリスマス期間
-            (target.month == 1 and target.day <= 3) or    # 年始
-            (target.weekday() >= 5)                        # 週末
+            (target.month == 12 and target.day >= 15) or
+            (target.month == 1 and target.day <= 3) or
+            (target.weekday() >= 5)
         )
         
-        # 祝日の場合は土曜日を参照
-        ref_weekday = 5 if is_special and target_weekday < 5 else target_weekday
-        
-        # 前週・前前週の同曜日を探す
         prev_week_date = target - pd.Timedelta(days=7)
         prev_prev_week_date = target - pd.Timedelta(days=14)
         
-        # 祝日の場合、前週・前前週の土曜日を探す
         if is_special and target_weekday < 5:
             days_to_saturday = (5 - target_weekday) % 7
             if days_to_saturday == 0:
@@ -1180,84 +1213,150 @@ class DisneyLandWaitTimePredictorV3:
             prev_week_date = target - pd.Timedelta(days=days_to_saturday)
             prev_prev_week_date = target - pd.Timedelta(days=days_to_saturday + 7)
         
-        # データファイルを読み込み
-        prev_week_data = None
-        prev_prev_week_data = None
+        prev_week_actual = self._load_day_actual_data(
+            prev_week_date.strftime('%Y-%m-%d'))
+        prev_prev_week_actual = self._load_day_actual_data(
+            prev_prev_week_date.strftime('%Y-%m-%d'))
         
-        data_dir = "Disneyland"
-        
-        prev_week_file = os.path.join(data_dir, f"disneyland_daily_{prev_week_date.strftime('%Y-%m-%d')}.csv")
-        prev_prev_week_file = os.path.join(data_dir, f"disneyland_daily_{prev_prev_week_date.strftime('%Y-%m-%d')}.csv")
-        
-        if os.path.exists(prev_week_file):
-            try:
-                prev_week_data = pd.read_csv(prev_week_file)
-                prev_week_avg = prev_week_data.groupby(['time', 'attraction_name'])['wait_time'].mean().reset_index()
-                prev_week_avg.columns = ['time', 'attraction_name', 'prev_week_wait']
-            except:
-                prev_week_avg = None
-        else:
-            prev_week_avg = None
-        
-        if os.path.exists(prev_prev_week_file):
-            try:
-                prev_prev_week_data = pd.read_csv(prev_prev_week_file)
-                prev_prev_week_avg = prev_prev_week_data.groupby(['time', 'attraction_name'])['wait_time'].mean().reset_index()
-                prev_prev_week_avg.columns = ['time', 'attraction_name', 'prev_prev_week_wait']
-            except:
-                prev_prev_week_avg = None
-        else:
-            prev_prev_week_avg = None
-        
-        # 補正を適用
-        if prev_week_avg is not None or prev_prev_week_avg is not None:
-            # マージ
-            if prev_week_avg is not None:
-                df = df.merge(prev_week_avg, on=['time', 'attraction_name'], how='left')
+        if prev_week_actual is not None or prev_prev_week_actual is not None:
+            if prev_week_actual is not None:
+                prev_week_actual.columns = ['time', 'attraction_name', 'prev_week_wait']
+                df = df.merge(prev_week_actual, on=['time', 'attraction_name'], how='left')
             else:
                 df['prev_week_wait'] = np.nan
             
-            if prev_prev_week_avg is not None:
-                df = df.merge(prev_prev_week_avg, on=['time', 'attraction_name'], how='left')
+            if prev_prev_week_actual is not None:
+                prev_prev_week_actual.columns = ['time', 'attraction_name', 'prev_prev_week_wait']
+                df = df.merge(prev_prev_week_actual, on=['time', 'attraction_name'], how='left')
             else:
                 df['prev_prev_week_wait'] = np.nan
             
-            # 加重平均で予測を補正
-            # モデル予測 40% + 前週 40% + 前前週 20%
-            model_weight = 0.4
-            prev_week_weight = 0.4
-            prev_prev_week_weight = 0.2
+            # 前週データ中心のブレンド: モデル 25% + 前週 50% + 前前週 25%
+            model_w = 0.25
+            prev_w = 0.50
+            prev2_w = 0.25
             
-            # 特別日（クリスマス期間）は前週データをより重視
             if is_special:
-                model_weight = 0.3
-                prev_week_weight = 0.5
-                prev_prev_week_weight = 0.2
+                model_w = 0.20
+                prev_w = 0.55
+                prev2_w = 0.25
             
             def blend_prediction(row):
                 model_pred = row['predicted_wait_time']
-                prev_week = row.get('prev_week_wait', np.nan)
-                prev_prev_week = row.get('prev_prev_week_wait', np.nan)
+                pw = row.get('prev_week_wait', np.nan)
+                ppw = row.get('prev_prev_week_wait', np.nan)
                 
-                total_weight = model_weight
-                weighted_sum = model_pred * model_weight
+                total_w = model_w
+                wsum = model_pred * model_w
                 
-                if pd.notna(prev_week) and prev_week > 0:
-                    weighted_sum += prev_week * prev_week_weight
-                    total_weight += prev_week_weight
+                if pd.notna(pw) and pw > 0:
+                    wsum += pw * prev_w
+                    total_w += prev_w
                 
-                if pd.notna(prev_prev_week) and prev_prev_week > 0:
-                    weighted_sum += prev_prev_week * prev_prev_week_weight
-                    total_weight += prev_prev_week_weight
+                if pd.notna(ppw) and ppw > 0:
+                    wsum += ppw * prev2_w
+                    total_w += prev2_w
                 
-                return weighted_sum / total_weight if total_weight > 0 else model_pred
+                return wsum / total_w if total_w > 0 else model_pred
             
             df['predicted_wait_time'] = df.apply(blend_prediction, axis=1)
-            
-            # 一時カラムを削除
             df = df.drop(columns=['prev_week_wait', 'prev_prev_week_wait'], errors='ignore')
             
-            print(f"📊 ハイブリッド予測: 前週({prev_week_date.strftime('%m/%d')}) + 前前週({prev_prev_week_date.strftime('%m/%d')}) データで補正")
+            src = []
+            if prev_week_actual is not None:
+                src.append(f"前週({prev_week_date.strftime('%m/%d')})")
+            if prev_prev_week_actual is not None:
+                src.append(f"前前週({prev_prev_week_date.strftime('%m/%d')})")
+            print(f"📊 ハイブリッド予測: {' + '.join(src)} データで補正 (モデル{int(model_w*100)}%/前週{int(prev_w*100)}%/前前週{int(prev2_w*100)}%)")
+        else:
+            print("⚠️ 前週・前前週の実績データなし — モデル予測のみ")
+        
+        return df
+    
+    def apply_bias_correction(self, df, target_date):
+        """直近の同曜日実績との乖離に基づくアトラクション別補正
+        
+        過去の予測ファイルに依存せず、直近の実績データと
+        現在の予測値を直接比較して補正する。
+        """
+        target = pd.to_datetime(target_date)
+        target_weekday = target.weekday()
+        data_dir = "Disneyland"
+        park_prefix = "disneyland"
+        
+        # 直近4週の同曜日の実績を収集
+        recent_actual = []
+        for weeks_back in range(1, 5):
+            ref_date = target - pd.Timedelta(days=7 * weeks_back)
+            if ref_date.weekday() != target_weekday:
+                continue
+            ref_str = ref_date.strftime('%Y-%m-%d')
+            actual = self._load_day_actual_data(ref_str, data_dir, park_prefix)
+            if actual is not None:
+                actual = actual.copy()
+                actual.columns = ['time', 'attraction_name', 'wait_time']
+                recent_actual.append(actual)
+        
+        if not recent_actual:
+            print("⚠️ バイアス補正: 同曜日実績データなし — スキップ")
+            return df
+        
+        actual_combined = pd.concat(recent_actual, ignore_index=True)
+        
+        # アトラクション×時間帯ごとの実績平均
+        actual_avg = actual_combined.groupby(
+            ['time', 'attraction_name']
+        )['wait_time'].mean().reset_index()
+        actual_avg.columns = ['time', 'attraction_name', 'recent_avg_actual']
+        
+        # アトラクション全体の実績平均（時間帯問わず）
+        attr_avg = actual_combined.groupby('attraction_name').agg(
+            overall_avg=('wait_time', 'mean'),
+            data_count=('wait_time', 'count')
+        ).reset_index()
+        
+        # 現在の予測とマージ
+        df = df.merge(actual_avg, on=['time', 'attraction_name'], how='left')
+        df = df.merge(attr_avg, on='attraction_name', how='left')
+        
+        def correct_prediction(row):
+            pred = row['predicted_wait_time']
+            recent = row.get('recent_avg_actual', np.nan)
+            overall = row.get('overall_avg', np.nan)
+            count = row.get('data_count', 0)
+            
+            if pd.isna(recent) or recent <= 0 or count < 10:
+                return pred
+            
+            gap = recent - pred
+            
+            # 予測が実績よりかなり低い場合、実績寄りに補正
+            if gap > 10:
+                return pred + gap * 0.60
+            elif gap < -10:
+                return pred + gap * 0.30
+            
+            return pred
+        
+        df['predicted_wait_time'] = df.apply(correct_prediction, axis=1)
+        df['predicted_wait_time'] = df['predicted_wait_time'].clip(lower=0)
+        
+        # 補正結果のログ
+        corrected = df[df['recent_avg_actual'].notna()].copy()
+        if not corrected.empty:
+            attr_summary = corrected.groupby('attraction_name').agg(
+                avg_pred=('predicted_wait_time', 'mean'),
+                avg_actual=('recent_avg_actual', 'mean')
+            ).reset_index()
+            attr_summary['gap'] = attr_summary['avg_actual'] - attr_summary['avg_pred']
+            significant = attr_summary[attr_summary['gap'].abs() > 5].sort_values('gap', ascending=False)
+            
+            print(f"📊 バイアス補正: {len(recent_actual)}週分の同曜日実績で補正")
+            for _, row in significant.head(8).iterrows():
+                direction = '↑' if row['gap'] > 0 else '↓'
+                print(f"   {direction} {row['attraction_name']}: 予測{row['avg_pred']:.0f}分 / 実績平均{row['avg_actual']:.0f}分")
+        
+        df = df.drop(columns=['recent_avg_actual', 'overall_avg', 'data_count'], errors='ignore')
         
         return df
     
