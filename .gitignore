@@ -40,6 +40,7 @@ logs/
 predictions_sea/
 predictions_land/
 predictions/
+predictions_x/
 
 # モデルファイル（Git LFSで管理）
 # *.pkl

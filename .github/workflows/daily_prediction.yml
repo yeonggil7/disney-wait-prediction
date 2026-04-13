@@ -1,11 +1,10 @@
-name: 🎢 Daily TDR Wait Time Prediction
+name: Daily TDR Wait Time Prediction
 
 on:
-  # 毎日 11:00 UTC = 日本時間 20:00 JST に実行（翌日の予測を投稿）
   schedule:
+    # 毎日 11:00 UTC = 日本時間 20:00 JST に実行（翌日の予測を投稿）
     - cron: '0 11 * * *'
-  
-  # 手動実行も可能
+
   workflow_dispatch:
     inputs:
       date:
@@ -19,60 +18,43 @@ env:
 jobs:
   predict-and-post:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: 📥 リポジトリをチェックアウト
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          lfs: true  # 大きいファイルがある場合
+          lfs: true
 
-      - name: 🐍 Python 3.11 をセットアップ
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: 📦 依存関係をインストール
+      - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: 📊 学習済みモデルをダウンロード
-        run: |
-          # モデルファイルがGit LFSにある場合
-          # git lfs pull
-          
-          # または、モデルを再学習（データがある場合）
-          # python disneysea_wait_time_predictor_v3.py --train
-          # python disneyland_wait_time_predictor_v3.py --train
-          
-          echo "✅ モデル準備完了"
-
-      - name: 🔮 予測実行 & X投稿
+      - name: Run prediction and post to X
         env:
+          X_POST_MODE: direct
           TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
           TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
           TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
           TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
-          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
         run: |
           DATE_ARG="${{ github.event.inputs.date }}"
           if [ -z "$DATE_ARG" ]; then
-            # 翌日の日付を取得
             DATE_ARG=$(date -d "+1 day" +%Y-%m-%d)
           fi
-          
-          echo "📅 予測日: $DATE_ARG（翌日分）"
-          # アトラクション個別投稿はレート制限のため無効化
-          # python daily_prediction.py --post --attractions --date "$DATE_ARG"
-          python daily_prediction.py --post --date "$DATE_ARG"
+          echo "Prediction date: $DATE_ARG"
+          python daily_x_post.py --post --date "$DATE_ARG"
 
-      - name: 📁 成果物をアップロード
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: predictions-${{ github.run_id }}
-          path: |
-            predictions_sea/
-            predictions_land/
+          path: predictions_x/
           retention-days: 7
-
