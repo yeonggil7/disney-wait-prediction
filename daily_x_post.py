@@ -45,20 +45,46 @@ from generate_x_heatmap import (
 # 予測データ解析
 # ---------------------------------------------------------------------------
 
+SEA_SHORT_NAMES = {
+    'ソアリン': 'ソアリン',
+    'アナとエルサ': 'アナ雪',
+    'センターオブジアース': 'センター',
+    'タワーオブテラー': 'タワテラ',
+    'トイストーリーマニア': 'トイマニ',
+    'ラプンツェル': 'ラプンツェル',
+    'ピーターパン': 'ピーパン',
+    'プラザグリーティング': 'プラグリ',
+    'レイジングスピリッツ': 'レイジング',
+    'インディージョーンズクリスタルスカルの謎': 'インディ',
+}
+
+LAND_SHORT_NAMES = {
+    '美女と野獣の物語': '美女と野獣',
+    'モンスターズ・インク': 'モンスターズ',
+    'ミート・ミッキー': 'ミッキー',
+    'プーさんのハニーハント': 'プーさん',
+    'ベイマックスのハッピーライド': 'ベイマックス',
+    'ビッグサンダーマウンテン': 'ビッグサンダー',
+    'スプラッシュマウンテン': 'スプラッシュ',
+}
+
+
 def _get_prediction_insights(date_str, park='sea'):
-    """予測データからインサイトを抽出"""
+    """予測データからインサイトを抽出（各アトラクションの最大待ち時間含む）"""
     try:
         if park == 'sea':
             from disneysea_wait_time_predictor_v3 import DisneySeaWaitTimePredictorV3
             predictor = DisneySeaWaitTimePredictorV3()
             targets = SEA_TARGET_ATTRACTIONS
             display = SEA_DISPLAY_NAMES
+            short = SEA_SHORT_NAMES
             closures = get_sea_closures(date_str)
         else:
             from disneyland_wait_time_predictor_v3 import DisneyLandWaitTimePredictorV3
             predictor = DisneyLandWaitTimePredictorV3()
             targets = LAND_TARGET_ATTRACTIONS
             display = LAND_DISPLAY_NAMES
+            short = LAND_SHORT_NAMES
             closures = get_land_closures(date_str)
 
         attractions = [a for a in targets if a not in closures]
@@ -70,30 +96,27 @@ def _get_prediction_insights(date_str, park='sea'):
 
         insights = {}
 
-        # 最混雑アトラクション（日平均）
-        avg_by_attr = predictions.groupby('attraction_name')['predicted_wait_time'].mean()
-        busiest_attr = avg_by_attr.idxmax()
-        insights['busiest_name'] = display.get(busiest_attr, busiest_attr)[:8]
-        insights['busiest_wait'] = int(avg_by_attr.max())
-
-        # 穴場アトラクション（日平均最短）
-        calmest_attr = avg_by_attr.idxmin()
-        insights['calmest_name'] = display.get(calmest_attr, calmest_attr)[:8]
-        insights['calmest_wait'] = int(avg_by_attr.min())
-
-        # ピーク時間帯
-        avg_by_time = predictions.groupby('time')['predicted_wait_time'].mean()
-        peak_time = avg_by_time.idxmax()
-        insights['peak_time'] = peak_time
-        insights['peak_wait'] = int(avg_by_time.max())
-
-        # 空いてる時間帯
-        calm_time = avg_by_time.idxmin()
-        insights['calm_time'] = calm_time
-        insights['calm_wait'] = int(avg_by_time.min())
+        # 各アトラクションの最大待ち時間（10分単位で繰り上げ）
+        max_by_attr = predictions.groupby('attraction_name')['predicted_wait_time'].max()
+        import math
+        attr_max_list = []
+        for attr_name in targets:
+            if attr_name in closures:
+                continue
+            if attr_name in max_by_attr.index:
+                max_wait = int(math.ceil(max_by_attr[attr_name] / 10) * 10)
+                sname = short.get(attr_name, attr_name[:6])
+                attr_max_list.append((sname, max_wait))
+        attr_max_list.sort(key=lambda x: x[1], reverse=True)
+        insights['attr_max_list'] = attr_max_list
 
         # 全体平均
         insights['avg_wait'] = int(predictions['predicted_wait_time'].mean())
+
+        # 空いてる時間帯
+        avg_by_time = predictions.groupby('time')['predicted_wait_time'].mean()
+        calm_time = avg_by_time.idxmin()
+        insights['calm_time'] = calm_time
 
         # 混雑度判定
         avg = insights['avg_wait']
@@ -164,90 +187,58 @@ def _is_weekend(date_str):
     return dt.weekday() >= 4  # 金土日
 
 
-def create_sea_tweet(date_str):
+def _build_tweet(park_emoji, park_name, date_str, insights, closures, display_names, tips, hashtags):
+    """共通ツイート生成"""
     dt = datetime.strptime(date_str, '%Y-%m-%d')
     day_name = _get_weekday_ja(date_str)
-    closures = get_sea_closures(date_str)
-    closed_count = len(closures)
-    open_count = len(SEA_TARGET_ATTRACTIONS) - closed_count
 
-    insights = _get_prediction_insights(date_str, 'sea')
-
-    tweet = f"🌊 ディズニーシー AI待ち時間予測\n"
+    tweet = f"{park_emoji} {park_name} AI待ち時間予測\n"
     tweet += f"📅 {dt.month}/{dt.day}({day_name})"
 
     if insights:
         tweet += f" {insights['congestion_emoji']}{insights['congestion']}予想\n\n"
-        tweet += f"🎢 人気{open_count}アトラクション終日予測\n"
-        tweet += f"⏱ 平均待ち{insights['avg_wait']}分\n"
-        tweet += f"🔥 最混雑: {insights['busiest_name']} 平均{insights['busiest_wait']}分\n"
-        tweet += f"✨ 穴場: {insights['calmest_name']} 平均{insights['calmest_wait']}分\n"
-        tweet += f"⏰ 空き時間帯: {insights['calm_time']}〜\n"
+        # 各アトラクションの最大待ち時間
+        for name, wait in insights['attr_max_list']:
+            tweet += f"▸ {name} 最大{wait}分\n"
     else:
-        tweet += f"\n\n🎢 人気{open_count}アトラクション終日予測\n"
+        tweet += "\n\n"
 
+    closed_count = len(closures)
     if closed_count > 0:
-        closed_names = [SEA_DISPLAY_NAMES.get(a, a)[:6] for a in closures.keys()]
+        closed_names = [display_names.get(a, a)[:6] for a in closures.keys()]
         tweet += f"❌ 休止: {', '.join(closed_names)}\n"
 
+    if insights:
+        tweet += f"⏰ 空き時間帯: {insights['calm_time']}〜\n"
+
     tweet += "\n"
-
-    tip = random.choice(TIPS_SEA)
-    tweet += f"{tip}\n\n"
-
-    if _is_weekend(date_str):
-        tweet += f"{random.choice(WEEKEND_EXTRAS)}\n\n"
-
     tweet += random.choice(CTA_VARIATIONS) + "\n\n"
-    tweet += "#TDS #ディズニーシー #待ち時間 #TDR_now #ディズニー好きと繋がりたい"
+    tweet += hashtags
 
     if len(tweet) > 280:
         tweet = _trim_tweet(tweet)
 
     return tweet
+
+
+def create_sea_tweet(date_str):
+    closures = get_sea_closures(date_str)
+    insights = _get_prediction_insights(date_str, 'sea')
+    return _build_tweet(
+        '🌊', 'ディズニーシー', date_str, insights, closures,
+        SEA_DISPLAY_NAMES, TIPS_SEA,
+        '#TDS #ディズニーシー #待ち時間 #TDR_now #ディズニー好きと繋がりたい',
+    )
 
 
 def create_land_tweet(date_str):
-    dt = datetime.strptime(date_str, '%Y-%m-%d')
-    day_name = _get_weekday_ja(date_str)
     closures = get_land_closures(date_str)
-    closed_count = len(closures)
-    open_count = len(LAND_TARGET_ATTRACTIONS) - closed_count
-
     insights = _get_prediction_insights(date_str, 'land')
-
-    tweet = f"🏰 ディズニーランド AI待ち時間予測\n"
-    tweet += f"📅 {dt.month}/{dt.day}({day_name})"
-
-    if insights:
-        tweet += f" {insights['congestion_emoji']}{insights['congestion']}予想\n\n"
-        tweet += f"🎢 人気{open_count}アトラクション終日予測\n"
-        tweet += f"⏱ 平均待ち{insights['avg_wait']}分\n"
-        tweet += f"🔥 最混雑: {insights['busiest_name']} 平均{insights['busiest_wait']}分\n"
-        tweet += f"✨ 穴場: {insights['calmest_name']} 平均{insights['calmest_wait']}分\n"
-        tweet += f"⏰ 空き時間帯: {insights['calm_time']}〜\n"
-    else:
-        tweet += f"\n\n🎢 人気{open_count}アトラクション終日予測\n"
-
-    if closed_count > 0:
-        closed_names = [LAND_DISPLAY_NAMES.get(a, a)[:6] for a in closures.keys()]
-        tweet += f"❌ 休止: {', '.join(closed_names)}\n"
-
-    tweet += "\n"
-
-    tip = random.choice(TIPS_LAND)
-    tweet += f"{tip}\n\n"
-
-    if _is_weekend(date_str):
-        tweet += f"{random.choice(WEEKEND_EXTRAS)}\n\n"
-
-    tweet += random.choice(CTA_VARIATIONS) + "\n\n"
-    tweet += "#TDL #ディズニーランド #待ち時間 #TDR_now #ディズニー好きと繋がりたい"
-
-    if len(tweet) > 280:
-        tweet = _trim_tweet(tweet)
-
-    return tweet
+    return _build_tweet(
+        '🏰', 'ディズニーランド', date_str, insights, closures,
+        LAND_DISPLAY_NAMES, TIPS_LAND,
+        '#TDL #ディズニーランド #待ち時間 #TDR_now #ディズニー好きと繋がりたい',
+    )
 
 
 def _trim_tweet(tweet):
