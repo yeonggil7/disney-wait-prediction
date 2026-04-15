@@ -164,12 +164,10 @@ TIPS_LAND = [
 ]
 
 CTA_VARIATIONS = [
-    "明日行く方はいいね❤️で教えてね！",
-    "保存して当日活用してください📌",
-    "参考になったらRT🔄お願いします！",
-    "スクショ📱して当日の計画に役立ててね！",
-    "どのアトラクション気になる？リプで教えて💬",
-    "フォロー✅で毎日予測をお届け！",
+    "行く方はいいね❤️で！",
+    "保存📌して活用してね！",
+    "参考になったらRT🔄",
+    "フォロー✅で毎日お届け！",
 ]
 
 WEEKEND_EXTRAS = [
@@ -187,17 +185,19 @@ def _is_weekend(date_str):
     return dt.weekday() >= 4  # 金土日
 
 
-def _build_tweet(park_emoji, park_name, date_str, insights, closures, display_names, tips, hashtags):
+def _build_tweet(park_emoji, park_name, date_str, insights, closures, display_names, tips, hashtags, cta_index=0):
     """共通ツイート生成"""
     dt = datetime.strptime(date_str, '%Y-%m-%d')
     day_name = _get_weekday_ja(date_str)
+
+    cta_seed = dt.timetuple().tm_yday + cta_index
+    cta = CTA_VARIATIONS[cta_seed % len(CTA_VARIATIONS)]
 
     tweet = f"{park_emoji} {park_name} AI待ち時間予測\n"
     tweet += f"📅 {dt.month}/{dt.day}({day_name})"
 
     if insights:
         tweet += f" {insights['congestion_emoji']}{insights['congestion']}予想\n\n"
-        # 各アトラクションの最大待ち時間
         for name, wait in insights['attr_max_list']:
             tweet += f"▸ {name} 最大{wait}分\n"
     else:
@@ -206,17 +206,16 @@ def _build_tweet(park_emoji, park_name, date_str, insights, closures, display_na
     closed_count = len(closures)
     if closed_count > 0:
         closed_names = [display_names.get(a, a)[:6] for a in closures.keys()]
-        tweet += f"❌ 休止: {', '.join(closed_names)}\n"
+        tweet += f"※休止: {', '.join(closed_names)}\n"
 
     if insights:
         tweet += f"⏰ 空き時間帯: {insights['calm_time']}〜\n"
 
     tweet += "\n"
-    tweet += random.choice(CTA_VARIATIONS) + "\n\n"
+    tweet += cta + "\n"
     tweet += hashtags
 
-    if len(tweet) > 280:
-        tweet = _trim_tweet(tweet)
+    tweet = _trim_tweet(tweet)
 
     return tweet
 
@@ -227,7 +226,8 @@ def create_sea_tweet(date_str):
     return _build_tweet(
         '🌊', 'ディズニーシー', date_str, insights, closures,
         SEA_DISPLAY_NAMES, TIPS_SEA,
-        '#TDS #ディズニーシー #待ち時間 #TDR_now #ディズニー好きと繋がりたい',
+        '#TDS #待ち時間 #TDR_now',
+        cta_index=0,
     )
 
 
@@ -237,16 +237,44 @@ def create_land_tweet(date_str):
     return _build_tweet(
         '🏰', 'ディズニーランド', date_str, insights, closures,
         LAND_DISPLAY_NAMES, TIPS_LAND,
-        '#TDL #ディズニーランド #待ち時間 #TDR_now #ディズニー好きと繋がりたい',
+        '#TDL #待ち時間 #TDR_now',
+        cta_index=1,
     )
 
 
+def _twitter_len(text):
+    """Twitter API の weighted character count（CJK/絵文字=2, ASCII=1）"""
+    count = 0
+    for ch in text:
+        cp = ord(ch)
+        if ch == '\n':
+            count += 1
+        elif (0x1100 <= cp <= 0x115f) or (0x2e80 <= cp <= 0x303e) or \
+             (0x3041 <= cp <= 0x33bf) or (0x3400 <= cp <= 0x4dbf) or \
+             (0x4e00 <= cp <= 0xa4cf) or (0xac00 <= cp <= 0xd7ff) or \
+             (0xfe30 <= cp <= 0xfe4f) or (0xff00 <= cp <= 0xffef) or \
+             cp >= 0x1f000:
+            count += 2
+        else:
+            count += 1
+    return count
+
+
 def _trim_tweet(tweet):
-    """280文字以内に収める"""
+    """Twitter weighted count で 280 文字以内に収める"""
     lines = tweet.split('\n')
-    while len('\n'.join(lines)) > 280 and len(lines) > 5:
+    # まず Tips/Weekend 行を削除
+    while _twitter_len('\n'.join(lines)) > 280 and len(lines) > 5:
         for i, line in enumerate(lines):
             if line.startswith('💡') or line.startswith('🎪'):
+                lines.pop(i)
+                break
+        else:
+            break
+    # まだ超えていればアトラクション行を末尾から削除
+    while _twitter_len('\n'.join(lines)) > 280 and len(lines) > 5:
+        for i in range(len(lines) - 1, -1, -1):
+            if lines[i].startswith('▸'):
                 lines.pop(i)
                 break
         else:
@@ -323,7 +351,7 @@ def main():
         print("-" * 60)
         print(sea_tweet)
         print("-" * 60)
-        print(f"📊 文字数: {len(sea_tweet)}/280")
+        print(f"📊 文字数: {_twitter_len(sea_tweet)}/280")
         if sea_image:
             print(f"🖼️  画像: {sea_image}")
 
@@ -333,7 +361,7 @@ def main():
         print("-" * 60)
         print(land_tweet)
         print("-" * 60)
-        print(f"📊 文字数: {len(land_tweet)}/280")
+        print(f"📊 文字数: {_twitter_len(land_tweet)}/280")
         if land_image:
             print(f"🖼️  画像: {land_image}")
 

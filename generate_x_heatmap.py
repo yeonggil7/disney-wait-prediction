@@ -23,8 +23,12 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.colors import LinearSegmentedColormap
 
-# 日本語フォント設定
-plt.rcParams['font.family'] = ['Hiragino Sans', 'Yu Gothic', 'Meiryo', 'sans-serif']
+# 日本語フォント設定（macOS / Ubuntu 両対応）
+import matplotlib.font_manager as fm
+_jp_fonts = ['Hiragino Sans', 'Yu Gothic', 'Meiryo', 'Noto Sans CJK JP', 'Noto Sans CJK', 'sans-serif']
+_available = {f.name for f in fm.fontManager.ttflist}
+_selected = [f for f in _jp_fonts if f in _available] or ['sans-serif']
+plt.rcParams['font.family'] = _selected
 
 try:
     import seaborn as sns
