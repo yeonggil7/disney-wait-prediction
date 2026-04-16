@@ -243,20 +243,26 @@ def create_land_tweet(date_str):
 
 
 def _twitter_len(text):
-    """Twitter API の weighted character count（CJK/絵文字=2, ASCII=1）"""
+    """Twitter API の weighted character count.
+
+    Twitter text library の仕様: codepoint <= 0x10FF は weight 1,
+    それ以外は weight 2（一部例外あり）。
+    """
+    WEIGHT1_RANGES = [
+        (0x0000, 0x10FF),
+        (0x2000, 0x200D),
+        (0x2010, 0x201F),
+        (0x2032, 0x2037),
+    ]
     count = 0
     for ch in text:
         cp = ord(ch)
-        if ch == '\n':
-            count += 1
-        elif (0x1100 <= cp <= 0x115f) or (0x2e80 <= cp <= 0x303e) or \
-             (0x3041 <= cp <= 0x33bf) or (0x3400 <= cp <= 0x4dbf) or \
-             (0x4e00 <= cp <= 0xa4cf) or (0xac00 <= cp <= 0xd7ff) or \
-             (0xfe30 <= cp <= 0xfe4f) or (0xff00 <= cp <= 0xffef) or \
-             cp >= 0x1f000:
-            count += 2
-        else:
-            count += 1
+        w = 2
+        for lo, hi in WEIGHT1_RANGES:
+            if lo <= cp <= hi:
+                w = 1
+                break
+        count += w
     return count
 
 
