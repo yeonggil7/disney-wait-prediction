@@ -1,0 +1,82 @@
+name: Weekly Reels Cover A/B Report
+
+on:
+  schedule:
+    # 毎週月曜 01:00 UTC = 日本時間 10:00 JST
+    # (instagram_insights.yml の 1時間後)
+    - cron: '0 1 * * 1'
+
+  workflow_dispatch:
+    inputs:
+      days:
+        description: '何日前まで遡るか'
+        required: false
+        default: '14'
+      since:
+        description: '起点日 YYYY-MM-DD (--days より優先)'
+        required: false
+        default: ''
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  cover-ab-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate cover A/B report
+        env:
+          INSTAGRAM_API_MODE: graph
+          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
+          FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_APP_SECRET }}
+        run: |
+          DAYS="${{ github.event.inputs.days }}"
+          DAYS="${DAYS:-14}"
+          SINCE="${{ github.event.inputs.since }}"
+
+          STAMP=$(date -u +%Y-%m-%d)
+          OUT="reports/cover_ab_${STAMP}.md"
+          JSON_OUT="reports/cover_ab_${STAMP}.json"
+          mkdir -p reports
+
+          ARGS="--days $DAYS --out $OUT --json $JSON_OUT"
+          if [ -n "$SINCE" ]; then
+            ARGS="$ARGS --since $SINCE"
+          fi
+
+          echo "Running: python scripts/cover_ab_report.py $ARGS"
+          python scripts/cover_ab_report.py $ARGS
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cover-ab-report-${{ github.run_id }}
+          path: reports/cover_ab_*.*
+          retention-days: 90
+
+      - name: Commit report
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/ || true
+          git commit -m "report: cover A/B $(date -u +%Y-%m-%d) [skip ci]" || echo "No changes"
+          git push || echo "Push failed (no permission?)"

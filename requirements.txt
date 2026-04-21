@@ -11,3 +11,8 @@ python-dotenv>=1.0.0
 requests>=2.31.0
 beautifulsoup4>=4.12.0
 jpholiday>=0.1.8
+# Instagram自動投稿用 (instagrapi バックエンド)
+instagrapi>=2.0.0
+moviepy>=1.0.3
+# トレンド収集 (Google News RSS / その他フィード)
+feedparser>=6.0.10

@@ -1,0 +1,81 @@
+name: Weekly Instagram Insights
+
+on:
+  schedule:
+    # 毎週月曜 00:00 UTC = 日本時間 09:00 JST（先週の振り返り）
+    - cron: '0 0 * * 1'
+
+  workflow_dispatch:
+    inputs:
+      days:
+        description: '何日前まで遡るか'
+        required: false
+        default: '7'
+      since:
+        description: '起点日 YYYY-MM-DD (--days より優先)'
+        required: false
+        default: ''
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  insights-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate insights report
+        env:
+          INSTAGRAM_API_MODE: graph
+          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
+          FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_APP_SECRET }}
+        run: |
+          DAYS="${{ github.event.inputs.days }}"
+          DAYS="${DAYS:-7}"
+          SINCE="${{ github.event.inputs.since }}"
+
+          STAMP=$(date -u +%Y-%m-%d)
+          OUT="reports/instagram_weekly_${STAMP}.md"
+          JSON_OUT="reports/instagram_weekly_${STAMP}.json"
+          mkdir -p reports
+
+          ARGS="--days $DAYS --out $OUT --json-out $JSON_OUT"
+          if [ -n "$SINCE" ]; then
+            ARGS="$ARGS --since $SINCE"
+          fi
+
+          echo "Running: python scripts/ig_insights_report.py $ARGS"
+          python scripts/ig_insights_report.py $ARGS
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: instagram-weekly-report-${{ github.run_id }}
+          path: reports/instagram_weekly_*.*
+          retention-days: 90
+
+      - name: Commit report
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/ || true
+          git commit -m "report: weekly instagram insights $(date -u +%Y-%m-%d) [skip ci]" || echo "No changes"
+          git push || echo "Push failed (no permission?)"

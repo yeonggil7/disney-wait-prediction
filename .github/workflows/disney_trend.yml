@@ -1,0 +1,75 @@
+name: Daily Disney Trend Digest
+
+on:
+  schedule:
+    # 毎日 22:00 UTC = 日本時間 翌日 07:00 JST (朝の運用チェック用)
+    - cron: '0 22 * * *'
+
+  workflow_dispatch:
+    inputs:
+      news_per_query:
+        description: '1クエリあたりの取得件数'
+        required: false
+        default: '8'
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  trend-digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Japanese fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk > /dev/null 2>&1
+          fc-cache -f
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate trend digest
+        env:
+          # Reddit はトークンがあれば自動で取得 (任意)
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
+        run: |
+          NPQ="${{ github.event.inputs.news_per_query }}"
+          NPQ="${NPQ:-8}"
+
+          mkdir -p reports
+          python scripts/generate_trend_digest.py --collect --news-per-query $NPQ
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: disney-trend-${{ github.run_id }}
+          path: |
+            reports/disney_trend_*.json
+            reports/disney_trend_digest_*.md
+            reports/disney_trend_digest_*.png
+          retention-days: 90
+
+      - name: Commit digest
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/ || true
+          git commit -m "report: disney trend digest $(date -u +%Y-%m-%d) [skip ci]" || echo "No changes"
+          git push || echo "Push failed (no permission?)"
