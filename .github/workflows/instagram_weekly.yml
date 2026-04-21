@@ -1,0 +1,112 @@
+name: Weekly Instagram Ranking
+
+on:
+  schedule:
+    # 毎週日曜 12:00 UTC = 日本時間 21:00 JST（翌週月曜の週間ランキング）
+    - cron: '0 12 * * 0'
+
+  workflow_dispatch:
+    inputs:
+      start:
+        description: '起点日 (YYYY-MM-DD形式、空欄は次の月曜)'
+        required: false
+        default: ''
+      days:
+        description: '集計日数'
+        required: false
+        default: '7'
+      mode:
+        description: '投稿モード'
+        required: false
+        default: 'carousel'
+        type: choice
+        options:
+          - carousel
+          - feed
+          - sea_only
+          - land_only
+      dry_run:
+        description: 'ドライラン'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  weekly-ranking:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Japanese fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk > /dev/null 2>&1
+          fc-cache -f
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run weekly ranking post
+        env:
+          INSTAGRAM_API_MODE: ${{ secrets.INSTAGRAM_API_MODE }}
+          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_GRAPH_BACKEND: ${{ secrets.INSTAGRAM_GRAPH_BACKEND }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_MODEL_REPO: ${{ secrets.HF_MODEL_REPO }}
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
+          FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_APP_SECRET }}
+          IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
+        run: |
+          START_ARG="${{ github.event.inputs.start }}"
+          DAYS_ARG="${{ github.event.inputs.days }}"
+          DAYS_ARG="${DAYS_ARG:-7}"
+
+          MODE="${{ github.event.inputs.mode }}"
+          MODE="${MODE:-carousel}"
+
+          DRY_RUN="${{ github.event.inputs.dry_run }}"
+          DRY_RUN="${DRY_RUN:-false}"
+
+          ARGS="--days $DAYS_ARG"
+          if [ -n "$START_ARG" ]; then
+            ARGS="$ARGS --start $START_ARG"
+          fi
+          if [ "$DRY_RUN" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          else
+            ARGS="$ARGS --post"
+          fi
+
+          case "$MODE" in
+            carousel) ARGS="$ARGS --carousel" ;;
+            sea_only) ARGS="$ARGS --sea-only" ;;
+            land_only) ARGS="$ARGS --land-only" ;;
+          esac
+
+          echo "Running: python weekly_ranking_post.py $ARGS"
+          python weekly_ranking_post.py $ARGS
+
+      - name: Upload generated weekly images
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: instagram-weekly-${{ github.run_id }}
+          path: predictions_x/ig_weekly_*.png
+          retention-days: 30

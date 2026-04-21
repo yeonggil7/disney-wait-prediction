@@ -1,3 +1,2 @@
-# Git LFS で管理する大きいファイル
-*.joblib filter=lfs diff=lfs merge=lfs -text
-*.pkl filter=lfs diff=lfs merge=lfs -text
+# モデル (.joblib / .pkl) は Hugging Face Hub で配布
+# (LFS は使わない: 過去には *.joblib filter=lfs を設定していた)

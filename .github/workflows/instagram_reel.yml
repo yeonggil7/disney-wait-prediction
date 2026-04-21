@@ -1,0 +1,136 @@
+name: Daily Instagram Reels
+
+on:
+  schedule:
+    # 毎日 12:30 UTC = 日本時間 21:30 JST
+    # （フィード投稿20:00の後、夜のリールゴールデンタイムを狙う）
+    - cron: '30 12 * * *'
+
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '対象日 (YYYY-MM-DD形式、空欄は明日)'
+        required: false
+        default: ''
+      park:
+        description: 'パーク'
+        required: false
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - sea
+          - land
+      duration:
+        description: '動画長(秒) 5〜90'
+        required: false
+        default: '20'
+      bgm:
+        description: "BGM ('auto' / 'none' / 音源パス)"
+        required: false
+        default: 'auto'
+      bgm_volume_db:
+        description: 'BGM 音量 dB (例: -8, -12, -16)'
+        required: false
+        default: '-8'
+      no_share_to_feed:
+        description: 'フィードに表示しない (Reelsタブのみ)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      dry_run:
+        description: 'ドライラン'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  reel-post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Japanese fonts and ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk ffmpeg > /dev/null 2>&1
+          fc-cache -f
+          ffmpeg -version | head -1
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run reel post
+        env:
+          INSTAGRAM_API_MODE: graph
+          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_GRAPH_BACKEND: ${{ secrets.INSTAGRAM_GRAPH_BACKEND }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_MODEL_REPO: ${{ secrets.HF_MODEL_REPO }}
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
+          FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_APP_SECRET }}
+          IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
+        run: |
+          DATE_ARG="${{ github.event.inputs.date }}"
+          if [ -z "$DATE_ARG" ]; then
+            DATE_ARG=$(date -d "+1 day" +%Y-%m-%d)
+          fi
+
+          PARK="${{ github.event.inputs.park }}"
+          PARK="${PARK:-both}"
+
+          DURATION="${{ github.event.inputs.duration }}"
+          DURATION="${DURATION:-20}"
+
+          BGM="${{ github.event.inputs.bgm }}"
+          BGM="${BGM:-auto}"
+          BGM_VOL="${{ github.event.inputs.bgm_volume_db }}"
+          BGM_VOL="${BGM_VOL:--8}"
+
+          NO_SHARE="${{ github.event.inputs.no_share_to_feed }}"
+          DRY_RUN="${{ github.event.inputs.dry_run }}"
+          DRY_RUN="${DRY_RUN:-false}"
+
+          ARGS="--date $DATE_ARG --park $PARK --duration $DURATION --bgm $BGM --bgm-volume-db $BGM_VOL"
+          if [ "$DRY_RUN" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          else
+            ARGS="$ARGS --post"
+          fi
+          if [ "$NO_SHARE" = "true" ]; then
+            ARGS="$ARGS --no-share-to-feed"
+          fi
+
+          echo "Running: python daily_reel_post.py $ARGS"
+          python daily_reel_post.py $ARGS
+
+      - name: Upload generated reel artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: instagram-reel-${{ github.run_id }}
+          path: |
+            predictions_x/ig_reel_*.mp4
+            predictions_x/ig_reel_*_cover.png
+          retention-days: 14

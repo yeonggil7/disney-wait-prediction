@@ -7,6 +7,7 @@
 """
 
 import os
+import sys
 import glob
 import pandas as pd
 import numpy as np
@@ -528,13 +529,45 @@ class DisneySeaFeatureEngineerV3:
         return df
     
     def add_lag_features(self, df):
-        """ラグ特徴量"""
+        """前週・前日の同時間帯実績を特徴量として追加（予測時にも利用可能）"""
         df = df.sort_values(['attraction_name', 'date', 'time'])
-        df['prev_wait_time'] = df.groupby(['attraction_name', 'date'])['wait_time'].shift(1)
-        df['prev_wait_time'] = df['prev_wait_time'].fillna(0)
-        df['prev_2h_wait_time'] = df.groupby(['attraction_name', 'date'])['wait_time'].shift(4)
-        df['prev_2h_wait_time'] = df['prev_2h_wait_time'].fillna(0)
-        
+
+        if 'date' not in df.columns:
+            df['prev_week_same_time'] = 0
+            df['prev_week_daily_avg'] = 0
+            df['prev_2week_same_time'] = 0
+            return df
+
+        df['date_parsed_lag'] = pd.to_datetime(df['date'], errors='coerce')
+
+        lookup = df[df['wait_time'] > 0].set_index(
+            ['attraction_name', 'date_parsed_lag', 'time']
+        )['wait_time']
+        lookup = lookup[~lookup.index.duplicated(keep='last')]
+
+        daily_avg = df[df['wait_time'] > 0].groupby(
+            ['attraction_name', 'date_parsed_lag']
+        )['wait_time'].mean()
+
+        def _get_prev(row, days_back):
+            try:
+                prev_date = row['date_parsed_lag'] - pd.Timedelta(days=days_back)
+                return lookup.get((row['attraction_name'], prev_date, row['time']), 0)
+            except Exception:
+                return 0
+
+        def _get_daily_avg(row, days_back):
+            try:
+                prev_date = row['date_parsed_lag'] - pd.Timedelta(days=days_back)
+                return daily_avg.get((row['attraction_name'], prev_date), 0)
+            except Exception:
+                return 0
+
+        df['prev_week_same_time'] = df.apply(lambda r: _get_prev(r, 7), axis=1)
+        df['prev_2week_same_time'] = df.apply(lambda r: _get_prev(r, 14), axis=1)
+        df['prev_week_daily_avg'] = df.apply(lambda r: _get_daily_avg(r, 7), axis=1)
+
+        df = df.drop(columns=['date_parsed_lag'], errors='ignore')
         return df
     
     def add_interaction_features(self, df):
@@ -854,8 +887,8 @@ class DisneySeaWaitTimePredictorV3:
             'wind_speed', 'is_rainy', 'weather_impact', 'discomfort_index',
             'is_windy', 'is_heavy_rain', 'outdoor_weather_impact',
             'hot_indoor_boost', 'rainy_indoor_boost',
-            # ラグ
-            'prev_wait_time', 'prev_2h_wait_time',
+            # 前週実績（予測時にも利用可能）
+            'prev_week_same_time', 'prev_2week_same_time', 'prev_week_daily_avg',
             # 交互作用（曜日強化）
             'popularity_weekend', 'popularity_saturday', 'popularity_sunday',
             'popularity_holiday', 'is_peak_hour', 'popularity_peak',
@@ -1031,8 +1064,14 @@ class DisneySeaWaitTimePredictorV3:
         print(f"💾 モデル保存完了: {self.model_dir}/")
     
     def load_models(self):
-        """モデルを読み込み"""
+        """モデルを読み込み (ローカルに無ければ Hugging Face Hub から自動DL)"""
         try:
+            try:
+                sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'scripts'))
+                from hf_model_loader import ensure_model_dir
+                ensure_model_dir(self.model_dir)
+            except ImportError:
+                pass
             self.models = joblib.load(os.path.join(self.model_dir, 'wait_time_models.joblib'))
             self.scaler = joblib.load(os.path.join(self.model_dir, 'scaler.joblib'))
             self.feature_columns = joblib.load(os.path.join(self.model_dir, 'feature_columns.joblib'))
@@ -1135,7 +1174,10 @@ class DisneySeaWaitTimePredictorV3:
                 })
         
         df = pd.DataFrame(records)
-        
+
+        # 前週・前前週の実績データを特徴量に充填
+        df = self._fill_prev_week_features(df, date)
+
         # 特徴量準備
         df, _ = self.prepare_features(df, fit=False, with_weather=False)
         
@@ -1159,6 +1201,35 @@ class DisneySeaWaitTimePredictorV3:
                   'temperature', 'is_rainy', 'weather_impact', 'is_weekend',
                   'is_holiday', 'weekday_crowding', 'special_date_crowding']]
     
+    def _fill_prev_week_features(self, df, target_date):
+        """予測時に前週・前前週の実績データを特徴量として充填"""
+        target = pd.to_datetime(target_date)
+        prev_week_date = (target - pd.Timedelta(days=7)).strftime('%Y-%m-%d')
+        prev_2week_date = (target - pd.Timedelta(days=14)).strftime('%Y-%m-%d')
+
+        pw_data = self._load_day_actual_data(prev_week_date)
+        p2w_data = self._load_day_actual_data(prev_2week_date)
+
+        pw_lookup = {}
+        pw_daily_avg = {}
+        if pw_data is not None:
+            for _, r in pw_data.iterrows():
+                pw_lookup[(r.iloc[1], r.iloc[0])] = r.iloc[2]
+            pw_daily_avg = pw_data.groupby(pw_data.columns[1])[pw_data.columns[2]].mean().to_dict()
+
+        p2w_lookup = {}
+        if p2w_data is not None:
+            for _, r in p2w_data.iterrows():
+                p2w_lookup[(r.iloc[1], r.iloc[0])] = r.iloc[2]
+
+        df['prev_week_same_time'] = df.apply(
+            lambda r: pw_lookup.get((r['attraction_name'], r['time']), 0), axis=1)
+        df['prev_week_daily_avg'] = df['attraction_name'].map(pw_daily_avg).fillna(0)
+        df['prev_2week_same_time'] = df.apply(
+            lambda r: p2w_lookup.get((r['attraction_name'], r['time']), 0), axis=1)
+
+        return df
+
     def _load_day_actual_data(self, date_str, data_dir="Disneysea", park_prefix="disneysea"):
         """指定日の実績データを読み込み（daily → monthly のフォールバック付き）"""
         import os
@@ -1237,15 +1308,15 @@ class DisneySeaWaitTimePredictorV3:
             else:
                 df['prev_prev_week_wait'] = np.nan
             
-            # 前週データ中心のブレンド: モデル 25% + 前週 50% + 前前週 25%
-            model_w = 0.25
-            prev_w = 0.50
-            prev2_w = 0.25
+            # モデル中心のブレンド: モデル 70% + 前週 20% + 前前週 10%
+            model_w = 0.70
+            prev_w = 0.20
+            prev2_w = 0.10
             
             if is_special:
-                model_w = 0.20
-                prev_w = 0.55
-                prev2_w = 0.25
+                model_w = 0.60
+                prev_w = 0.25
+                prev2_w = 0.15
             
             def blend_prediction(row):
                 model_pred = row['predicted_wait_time']
@@ -1336,13 +1407,8 @@ class DisneySeaWaitTimePredictorV3:
             
             gap = recent - pred
             
-            # 予測が実績よりかなり低い場合、実績寄りに補正
-            if gap > 10:
-                # 実績との差の60%を補正（実績のほうが高い場合）
-                return pred + gap * 0.60
-            elif gap < -10:
-                # 予測が実績より高すぎる場合も補正するが控えめに（30%）
-                return pred + gap * 0.30
+            if abs(gap) > 15:
+                return pred + gap * 0.25
             
             return pred
         

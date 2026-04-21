@@ -1,0 +1,118 @@
+name: Daily Instagram Recap
+
+on:
+  schedule:
+    # 毎日 02:30 UTC = 日本時間 11:30 JST（前日のCSVが揃ったタイミング）
+    - cron: '30 2 * * *'
+
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '対象日 (YYYY-MM-DD形式、空欄は昨日)'
+        required: false
+        default: ''
+      mode:
+        description: '投稿モード'
+        required: false
+        default: 'carousel'
+        type: choice
+        options:
+          - carousel      # シー+ランドを1投稿カルーセルに
+          - feed          # シー/ランドを別投稿
+          - sea_only
+          - land_only
+      dry_run:
+        description: 'ドライラン'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  instagram-recap:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Japanese fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk > /dev/null 2>&1
+          fc-cache -f
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run recap post
+        env:
+          INSTAGRAM_API_MODE: ${{ secrets.INSTAGRAM_API_MODE }}
+          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_GRAPH_BACKEND: ${{ secrets.INSTAGRAM_GRAPH_BACKEND }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_MODEL_REPO: ${{ secrets.HF_MODEL_REPO }}
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
+          FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_APP_SECRET }}
+          IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
+        run: |
+          DATE_ARG="${{ github.event.inputs.date }}"
+          if [ -z "$DATE_ARG" ]; then
+            DATE_ARG=$(date -d "-1 day" +%Y-%m-%d)
+          fi
+          echo "Recap date: $DATE_ARG"
+
+          MODE="${{ github.event.inputs.mode }}"
+          MODE="${MODE:-carousel}"
+
+          DRY_RUN="${{ github.event.inputs.dry_run }}"
+          DRY_RUN="${DRY_RUN:-false}"
+
+          ARGS="--date $DATE_ARG"
+          if [ "$DRY_RUN" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          else
+            ARGS="$ARGS --post"
+          fi
+
+          case "$MODE" in
+            carousel) ARGS="$ARGS --carousel" ;;
+            sea_only) ARGS="$ARGS --sea-only" ;;
+            land_only) ARGS="$ARGS --land-only" ;;
+          esac
+
+          echo "Running: python daily_recap_post.py $ARGS"
+          python daily_recap_post.py $ARGS
+
+      - name: Upload generated recap images
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: instagram-recap-${{ github.run_id }}
+          path: predictions_x/ig_recap_*.png
+          retention-days: 14
+
+      - name: Commit post log
+        if: success()
+        run: |
+          if [ -f instagram_post_log.csv ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add instagram_post_log.csv || true
+            git commit -m "chore: update instagram_post_log [skip ci]" || echo "No changes"
+            git push || echo "Push failed (no permission?)"
+          fi

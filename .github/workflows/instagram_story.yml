@@ -1,0 +1,125 @@
+name: Instagram Stories
+
+on:
+  schedule:
+    # 毎日 22:30 UTC = 翌日 07:30 JST → 当日の "morning" briefing
+    - cron: '30 22 * * *'
+    # 毎日 08:00 UTC = 当日 17:00 JST → 翌日の "preview" briefing
+    - cron: '0 8 * * *'
+
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'モード (morning=当日 / preview=翌日 / evening=振り返り)'
+        required: false
+        default: 'morning'
+        type: choice
+        options:
+          - morning
+          - preview
+          - evening
+      date:
+        description: '対象日 (YYYY-MM-DD形式)'
+        required: false
+        default: ''
+      park:
+        description: 'パーク'
+        required: false
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - sea
+          - land
+      dry_run:
+        description: 'ドライラン'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  story-post:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Japanese fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk > /dev/null 2>&1
+          fc-cache -f
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Determine mode from cron
+        id: detect
+        run: |
+          MODE_INPUT="${{ github.event.inputs.mode }}"
+          if [ -n "$MODE_INPUT" ]; then
+            echo "mode=$MODE_INPUT" >> $GITHUB_OUTPUT
+          else
+            # cron based: 22:30 UTC=morning / 08:00 UTC=preview
+            HOUR=$(date -u +%H)
+            if [ "$HOUR" = "22" ]; then
+              echo "mode=morning" >> $GITHUB_OUTPUT
+            else
+              echo "mode=preview" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Run story post
+        env:
+          INSTAGRAM_API_MODE: ${{ secrets.INSTAGRAM_API_MODE }}
+          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_GRAPH_BACKEND: ${{ secrets.INSTAGRAM_GRAPH_BACKEND }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_MODEL_REPO: ${{ secrets.HF_MODEL_REPO }}
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
+          FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_APP_SECRET }}
+          IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
+        run: |
+          MODE="${{ steps.detect.outputs.mode }}"
+          DATE_ARG="${{ github.event.inputs.date }}"
+          PARK="${{ github.event.inputs.park }}"
+          PARK="${PARK:-both}"
+          DRY_RUN="${{ github.event.inputs.dry_run }}"
+          DRY_RUN="${DRY_RUN:-false}"
+
+          ARGS="--mode $MODE --park $PARK"
+          if [ -n "$DATE_ARG" ]; then
+            ARGS="$ARGS --date $DATE_ARG"
+          fi
+          if [ "$DRY_RUN" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          else
+            ARGS="$ARGS --post"
+          fi
+
+          echo "Running: python daily_story_post.py $ARGS"
+          python daily_story_post.py $ARGS
+
+      - name: Upload generated story images
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: instagram-story-${{ github.run_id }}
+          path: predictions_x/ig_story_*.png
+          retention-days: 7

@@ -16,3 +16,5 @@ instagrapi>=2.0.0
 moviepy>=1.0.3
 # トレンド収集 (Google News RSS / その他フィード)
 feedparser>=6.0.10
+# モデル配布 (Hugging Face Hub からの自動ダウンロード)
+huggingface_hub>=0.25.0

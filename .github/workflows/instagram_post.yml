@@ -1,0 +1,144 @@
+name: Daily Instagram Post
+
+on:
+  schedule:
+    # 毎日 11:05 UTC = 日本時間 20:05 JST に実行（X投稿の5分後）
+    - cron: '5 11 * * *'
+
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '予測日 (YYYY-MM-DD形式、空欄は明日)'
+        required: false
+        default: ''
+      mode:
+        description: '投稿モード'
+        required: false
+        default: 'feed'
+        type: choice
+        options:
+          - feed          # 通常: シー＋ランドの個別フィード
+          - carousel      # シー＋ランドを1投稿のカルーセルに
+          - feed_story    # フィード + ストーリーズ両方
+          - sea_only
+          - land_only
+      dry_run:
+        description: 'ドライラン（投稿せず生成のみ）'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  instagram-post:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Japanese fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk > /dev/null 2>&1
+          fc-cache -f
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Restore Instagram session (instagrapi fallback only)
+        env:
+          IG_SESSION_B64: ${{ secrets.INSTAGRAM_SESSION_B64 }}
+        run: |
+          if [ -n "$IG_SESSION_B64" ]; then
+            echo "♻️  Restoring Instagram session from secret..."
+            echo "$IG_SESSION_B64" | base64 -d > .ig_session.json
+            echo "✅ Session restored ($(wc -c < .ig_session.json) bytes)"
+          else
+            echo "ℹ️ INSTAGRAM_SESSION_B64 not set (OK if using graph mode)"
+          fi
+
+      - name: Run Instagram daily post
+        env:
+          # バックエンド選択 (graph / instagrapi) — graphが推奨
+          INSTAGRAM_API_MODE: ${{ secrets.INSTAGRAM_API_MODE }}
+          # --- Graph API (公式) ---
+          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_GRAPH_BACKEND: ${{ secrets.INSTAGRAM_GRAPH_BACKEND }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_MODEL_REPO: ${{ secrets.HF_MODEL_REPO }}
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
+          FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_APP_SECRET }}
+          IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
+          # --- instagrapi (フォールバック) ---
+          INSTAGRAM_USERNAME: ${{ secrets.INSTAGRAM_USERNAME }}
+          INSTAGRAM_PASSWORD: ${{ secrets.INSTAGRAM_PASSWORD }}
+          INSTAGRAM_TOTP_SECRET: ${{ secrets.INSTAGRAM_TOTP_SECRET }}
+          INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
+        run: |
+          DATE_ARG="${{ github.event.inputs.date }}"
+          if [ -z "$DATE_ARG" ]; then
+            DATE_ARG=$(date -d "+1 day" +%Y-%m-%d)
+          fi
+          echo "Prediction date: $DATE_ARG"
+
+          MODE="${{ github.event.inputs.mode }}"
+          MODE="${MODE:-feed}"
+
+          DRY_RUN="${{ github.event.inputs.dry_run }}"
+          DRY_RUN="${DRY_RUN:-false}"
+
+          ARGS="--date $DATE_ARG"
+          if [ "$DRY_RUN" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          else
+            ARGS="$ARGS --post"
+          fi
+
+          case "$MODE" in
+            carousel)
+              ARGS="$ARGS --carousel"
+              ;;
+            feed_story)
+              ARGS="$ARGS --story"
+              ;;
+            sea_only)
+              ARGS="$ARGS --sea-only"
+              ;;
+            land_only)
+              ARGS="$ARGS --land-only"
+              ;;
+          esac
+
+          echo "Running: python daily_instagram_post.py $ARGS"
+          python daily_instagram_post.py $ARGS
+
+      - name: Save updated session as artifact
+        if: always() && hashFiles('.ig_session.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: ig-session-${{ github.run_id }}
+          path: .ig_session.json
+          retention-days: 30
+
+      - name: Upload generated images
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: instagram-predictions-${{ github.run_id }}
+          path: predictions_x/ig_*.png
+          retention-days: 14

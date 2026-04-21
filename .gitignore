@@ -42,10 +42,13 @@ predictions_land/
 predictions/
 predictions_x/
 
-# モデルファイル（Git LFSで管理）
-# *.pkl
-# *.joblib
-# models/
+# モデルファイル: Hugging Face Hub で配布 (Git では管理しない)
+*.pkl
+*.joblib
+models/
+models_v2/
+models_v3/
+models_land_v3/
 
 # データファイル
 # ※Disneyland/ と Disneysea/ は学習に必要なためコミット対象
@@ -53,4 +56,8 @@ predictions_x/
 # 一時ファイル
 *.tmp
 *.temp
+
+# Instagram セッション（認証情報）
+.ig_session.json
+*.ig_session.json
 
