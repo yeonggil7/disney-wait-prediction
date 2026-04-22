@@ -12,14 +12,15 @@ on:
         required: false
         default: ''
       mode:
-        description: '投稿モード'
+        description: '投稿モード (default=carousel: 1日1投稿に絞って品質特化)'
         required: false
-        default: 'feed'
+        default: 'carousel'
         type: choice
         options:
-          - feed          # 通常: シー＋ランドの個別フィード
-          - carousel      # シー＋ランドを1投稿のカルーセルに
-          - feed_story    # フィード + ストーリーズ両方
+          - carousel      # 推奨: シー＋ランドを1投稿のカルーセル化 (1投稿/日)
+          - auto_alt      # 曜日でシー/ランド交互 (1投稿/日)
+          - feed          # シー+ランド 個別投稿 (2投稿/日 = 旧設定)
+          - feed_story    # フィード + ストーリーズ
           - sea_only
           - land_only
       dry_run:
@@ -97,7 +98,8 @@ jobs:
           echo "Prediction date: $DATE_ARG"
 
           MODE="${{ github.event.inputs.mode }}"
-          MODE="${MODE:-feed}"
+          # スケジュール起動時は default=carousel (1日1投稿/品質特化)
+          MODE="${MODE:-carousel}"
 
           DRY_RUN="${{ github.event.inputs.dry_run }}"
           DRY_RUN="${DRY_RUN:-false}"
@@ -112,6 +114,17 @@ jobs:
           case "$MODE" in
             carousel)
               ARGS="$ARGS --carousel"
+              ;;
+            auto_alt)
+              # 偶数日=シー / 奇数日=ランド (毎日1投稿、グリッドで色が交互に並ぶ)
+              DOM=$(date -d "$DATE_ARG" +%d)
+              if [ $((10#$DOM % 2)) -eq 0 ]; then
+                ARGS="$ARGS --sea-only"
+                echo "🔁 auto_alt: 偶数日 → sea"
+              else
+                ARGS="$ARGS --land-only"
+                echo "🔁 auto_alt: 奇数日 → land"
+              fi
               ;;
             feed_story)
               ARGS="$ARGS --story"

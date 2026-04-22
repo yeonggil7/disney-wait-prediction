@@ -89,6 +89,16 @@ def _build_caption(park, date_str, insights=None):
         display_names = LAND_DISPLAY_NAMES
         hashtags = LAND_HASHTAGS
 
+    # トレンド連動ハッシュタグを先頭に追加
+    try:
+        sys.path.insert(0, str(PROJECT_DIR / 'scripts'))
+        from trend_hashtags import get_trend_hashtags
+        trend_tags = get_trend_hashtags(date=date_str, max_n=4, exclude=hashtags)
+        if trend_tags:
+            hashtags = trend_tags + list(hashtags)
+    except Exception:
+        pass
+
     lines = []
     lines.append(f"{emoji} {name} AI待ち時間予測")
     lines.append(f"📅 {dt.month}月{dt.day}日({day}) の混雑予測")

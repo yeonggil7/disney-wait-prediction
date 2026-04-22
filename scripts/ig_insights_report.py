@@ -47,9 +47,12 @@ ACCESS_TOKEN = os.environ.get("INSTAGRAM_ACCESS_TOKEN", "")
 
 # 投稿タイプ別のインサイト指標 (2024〜 Graph API v21+)
 # ※ impressions は廃止 → views を使用 (画像投稿でも利用可)
-METRICS_FEED = ["reach", "views", "saved", "likes", "comments", "shares", "total_interactions"]
-METRICS_REELS = ["reach", "views", "saved", "likes", "comments", "shares", "total_interactions"]
-METRICS_STORY = ["reach", "views", "replies", "navigation"]
+# ※ follows / profile_visits / profile_activity は v22+ で追加 (フォロワー増加要因の特定に重要)
+METRICS_FEED = ["reach", "views", "saved", "likes", "comments", "shares",
+                "total_interactions", "follows", "profile_visits"]
+METRICS_REELS = ["reach", "views", "saved", "likes", "comments", "shares",
+                 "total_interactions", "follows", "profile_visits"]
+METRICS_STORY = ["reach", "views", "replies", "navigation", "follows", "profile_visits"]
 
 
 def _api_get(path: str, params: dict = None) -> dict:
@@ -141,6 +144,153 @@ def _fetch_insights(media_id: str, media_type: str, product_type: str = "") -> d
     return out
 
 
+# =============================================================================
+# フォロワー増加要因 分析
+# =============================================================================
+def fetch_follower_history(since_dt: datetime, until_dt: datetime) -> dict:
+    """
+    アカウントレベルの follower_count 推移 (日次) を取得。
+
+    Returns:
+        {
+            "current": 1234,                # 取得時点
+            "delta_in_period": +50,         # 期間中の増加 (= sum of daily delta)
+            "daily": [{"date": "2026-04-15", "value": 12}, ...]  # 日次の新規 follow 数
+        }
+    """
+    out = {"current": 0, "delta_in_period": 0, "daily": []}
+    if not IG_USER_ID or not ACCESS_TOKEN:
+        return out
+
+    # 現在のフォロワー数
+    try:
+        meta = _api_get(IG_USER_ID, {"fields": "followers_count"})
+        out["current"] = int(meta.get("followers_count", 0) or 0)
+    except Exception as e:
+        print(f"   ⚠️ followers_count 取得失敗: {e}")
+
+    # 日次 follower_count (追加数)
+    try:
+        # IG insights は max 30 日まで一度に取得可能
+        days = min(30, (until_dt - since_dt).days + 1)
+        params = {
+            "metric": "follower_count",
+            "period": "day",
+            "since": int((until_dt - timedelta(days=days)).timestamp()),
+            "until": int(until_dt.timestamp()),
+        }
+        data = _api_get(f"{IG_USER_ID}/insights", params)
+        for m in data.get("data", []):
+            for v in m.get("values", []):
+                date = v.get("end_time", "")[:10]
+                val = int(v.get("value", 0) or 0)
+                out["daily"].append({"date": date, "value": val})
+        out["delta_in_period"] = sum(d["value"] for d in out["daily"])
+    except Exception as e:
+        print(f"   ⚠️ follower_count history 取得失敗: {e}")
+
+    return out
+
+
+def attribute_followers_to_posts(media_with_insights: list,
+                                  follower_history: dict) -> dict:
+    """
+    各投稿のフォロワー増加への寄与度を推定する。
+
+    優先度:
+      1. 投稿レベルの `follows` メトリクスが取れていれば、それを直接使用 (確度高)
+      2. 取れていなければ、投稿日と日次 follower_count の相関 (proxy) を計算
+
+    Returns:
+        {
+          "by_post": [{"post": item, "follows_estimated": int, "method": "direct"|"proxy"}],
+          "method": "direct" | "proxy" | "none",
+          "top_drivers": [...],  # 上位5件
+          "by_post_type": {"FEED": {...}, "REELS": {...}, "STORY": {...}},
+        }
+    """
+    by_post = []
+    method = "none"
+
+    # 1. 投稿レベルの follows メトリクスを優先
+    direct_total = 0
+    for m in media_with_insights:
+        f = m["insights"].get("follows", 0) or 0
+        if f and isinstance(f, (int, float)) and f > 0:
+            direct_total += int(f)
+            by_post.append({
+                "post": m,
+                "follows_estimated": int(f),
+                "profile_visits": int(m["insights"].get("profile_visits", 0) or 0),
+                "method": "direct",
+            })
+
+    if direct_total > 0:
+        method = "direct"
+
+    # 2. 取れない場合は proxy: 当日の follower_count delta を投稿のリーチで按分
+    if method == "none" and follower_history.get("daily"):
+        daily_map = {d["date"]: d["value"] for d in follower_history["daily"]}
+        # 同じ日の投稿で reach を按分
+        from collections import defaultdict
+        posts_by_date = defaultdict(list)
+        for m in media_with_insights:
+            ts = m.get("timestamp", "")
+            if not ts:
+                continue
+            date_key = ts[:10]
+            posts_by_date[date_key].append(m)
+        for date_key, posts in posts_by_date.items():
+            new_followers = daily_map.get(date_key, 0)
+            if new_followers <= 0 or not posts:
+                continue
+            total_reach = sum(p["insights"].get("reach", 0) or 0 for p in posts) or 1
+            for p in posts:
+                share = (p["insights"].get("reach", 0) or 0) / total_reach
+                est = int(round(new_followers * share))
+                if est > 0:
+                    by_post.append({
+                        "post": p,
+                        "follows_estimated": est,
+                        "profile_visits": int(p["insights"].get("profile_visits", 0) or 0),
+                        "method": "proxy",
+                    })
+        method = "proxy" if by_post else "none"
+
+    by_post.sort(key=lambda x: x["follows_estimated"], reverse=True)
+    top_drivers = by_post[:5]
+
+    # タイプ別集計
+    from collections import defaultdict
+    by_type = defaultdict(lambda: {"n": 0, "follows": 0, "reach": 0, "profile_visits": 0})
+    for entry in by_post:
+        m = entry["post"]
+        pt = (m.get("media_product_type") or m.get("media_type") or "POST").upper()
+        bt = by_type[pt]
+        bt["n"] += 1
+        bt["follows"] += entry["follows_estimated"]
+        bt["reach"] += int(m["insights"].get("reach", 0) or 0)
+        bt["profile_visits"] += entry["profile_visits"]
+
+    # 効率指標 (follows per 1k reach)
+    by_type_out = {}
+    for pt, v in by_type.items():
+        eff = (v["follows"] / v["reach"] * 1000) if v["reach"] else 0.0
+        pv2f = (v["follows"] / v["profile_visits"] * 100) if v["profile_visits"] else 0.0
+        by_type_out[pt] = {
+            **v,
+            "follows_per_1k_reach": eff,
+            "profile_visit_to_follow_pct": pv2f,
+        }
+
+    return {
+        "by_post": by_post,
+        "method": method,
+        "top_drivers": top_drivers,
+        "by_post_type": by_type_out,
+    }
+
+
 def _summarize(media_with_insights: list) -> dict:
     """全体集計"""
     feed = [m for m in media_with_insights
@@ -178,8 +328,123 @@ def _post_label(item: dict) -> str:
     return f"[{tag}] {head}"
 
 
+def _render_follower_section(follower_hist: dict, attribution: dict,
+                              since_dt: datetime, until_dt: datetime) -> list:
+    """フォロワー増加要因分析セクションを Markdown 行配列で返す"""
+    lines = []
+    lines.append("## 👥 フォロワー増加要因 分析")
+    lines.append("")
+
+    current = follower_hist.get("current", 0)
+    delta = follower_hist.get("delta_in_period", 0)
+    days = (until_dt - since_dt).days or 1
+    arrow = "🟢" if delta > 0 else ("🔴" if delta < 0 else "⚪")
+
+    lines.append(f"- 現在のフォロワー: **{current:,}**")
+    lines.append(f"- 期間中の増減 ({days}日): {arrow} **{delta:+,}** "
+                 f"(1日平均 {delta / days:+.1f})")
+
+    if not follower_hist.get("daily"):
+        lines.append("")
+        lines.append("> ⚠️ follower_count history が取得できませんでした。")
+        lines.append("> 権限 (`instagram_manage_insights`) と Business アカウント設定をご確認ください。")
+        return lines
+
+    # 日次推移の小型グラフ (テキストスパークライン)
+    daily = follower_hist["daily"]
+    if daily:
+        lines.append("")
+        lines.append("### 日次フォロワー増加 (期間内)")
+        lines.append("")
+        lines.append("| 日付 | 新規 follow | 累積 |")
+        lines.append("|---|---:|---:|")
+        cum = 0
+        for d in daily[-14:]:  # 直近14日まで
+            cum += d["value"]
+            lines.append(f"| {d['date']} | {d['value']:+d} | {cum:+d} |")
+        lines.append("")
+
+    # 投稿レベル要因
+    method = attribution.get("method", "none")
+    method_note = {
+        "direct": "✅ Graph API の `follows` メトリクスから直接計測",
+        "proxy":  "📊 投稿日の follower_count delta を投稿リーチで按分した推定値",
+        "none":   "⚠️ 投稿×フォロワー増加の対応が取れませんでした",
+    }.get(method, "")
+    lines.append(f"### 投稿別 寄与度 ({method_note})")
+    lines.append("")
+
+    drivers = attribution.get("top_drivers", [])
+    if drivers:
+        lines.append("**🏆 フォロワー獲得 TOP5 投稿**")
+        lines.append("")
+        lines.append("| # | 種別 | 推定 follows | reach | プロフィール訪問 | 投稿 |")
+        lines.append("|---|---|---:|---:|---:|---|")
+        for i, d in enumerate(drivers, 1):
+            m = d["post"]
+            ins = m["insights"]
+            pt = (m.get("media_product_type") or m.get("media_type") or "POST").upper()
+            head = (m.get("caption") or "").split("\n")[0][:30]
+            link = m.get("permalink", "")
+            lines.append(
+                f"| {i} | {pt} | **{d['follows_estimated']}** "
+                f"| {ins.get('reach', 0):,} | {d.get('profile_visits', 0)} "
+                f"| [{head}…]({link}) |"
+            )
+        lines.append("")
+    else:
+        lines.append("> 寄与度を分析できる投稿がありませんでした。")
+        lines.append("")
+
+    by_type = attribution.get("by_post_type", {})
+    if by_type:
+        lines.append("**🎯 投稿タイプ別 効率**")
+        lines.append("")
+        lines.append("| 種別 | 投稿数 | 推定 follows 合計 | follows/1k リーチ | profile→follow率 |")
+        lines.append("|---|---:|---:|---:|---:|")
+        for pt, v in sorted(by_type.items(), key=lambda kv: kv[1]["follows"], reverse=True):
+            lines.append(
+                f"| {pt} | {v['n']} | **{v['follows']}** "
+                f"| {v['follows_per_1k_reach']:.2f} "
+                f"| {v['profile_visit_to_follow_pct']:.2f}% |"
+            )
+        lines.append("")
+
+        # 自動洞察
+        lines.append("**💡 ハイライト**")
+        # 最も follows/1k reach が高いタイプ
+        best_eff = max(by_type.items(), key=lambda kv: kv[1]["follows_per_1k_reach"], default=None)
+        if best_eff and best_eff[1]["follows_per_1k_reach"] > 0:
+            pt, v = best_eff
+            lines.append(f"- **{pt}** が最もフォロワー獲得効率が高い "
+                         f"(リーチ1,000 あたり {v['follows_per_1k_reach']:.1f} follows)")
+            lines.append(f"  → このタイプの投稿頻度を増やすと効率的")
+
+        # 最も follows 絶対値が多いタイプ
+        best_total = max(by_type.items(), key=lambda kv: kv[1]["follows"], default=None)
+        if best_total and best_total[1]["follows"] > 0 and best_total[0] != (best_eff[0] if best_eff else None):
+            pt, v = best_total
+            lines.append(f"- 絶対数では **{pt}** が最多 ({v['follows']} follows)")
+
+        # 1日あたりに換算
+        if delta > 0:
+            target_30d = delta / days * 30
+            lines.append(f"- このペースだと **30日で +{target_30d:,.0f}** フォロワー予測")
+            if target_30d < 100:
+                lines.append("  - 目標 (+500/月) には不足。Reels/Story の頻度UP or プロフィール最適化を検討")
+            elif target_30d < 300:
+                lines.append("  - 順調なペース。トップ要因の投稿タイプを継続")
+            else:
+                lines.append("  - 強力なペース。bio の CTA を磨いて変換率をさらに上げるチャンス")
+        lines.append("")
+
+    return lines
+
+
 def _render_markdown(media_with_insights: list, summary: dict,
-                      since_dt: datetime, until_dt: datetime) -> str:
+                      since_dt: datetime, until_dt: datetime,
+                      follower_hist: dict | None = None,
+                      attribution: dict | None = None) -> str:
     lines = []
     lines.append("# Instagram 週次インサイトレポート")
     lines.append("")
@@ -195,6 +460,13 @@ def _render_markdown(media_with_insights: list, summary: dict,
     lines.append(f"- シェア数 合計: **{summary['total_shares']:,}**  / シェア率: **{summary['share_rate_pct']:.2f}%**")
     lines.append(f"- いいね合計: {summary['total_likes']:,}  / コメント: {summary['total_comments']:,}")
     lines.append("")
+
+    # ===== フォロワー増加要因 =====
+    if follower_hist is not None:
+        lines.extend(_render_follower_section(
+            follower_hist, attribution or {"by_post": [], "method": "none",
+                                           "top_drivers": [], "by_post_type": {}},
+            since_dt, until_dt))
 
     feed = [m for m in media_with_insights
             if (m.get("media_product_type") or "").upper() != "STORY"]
@@ -293,7 +565,18 @@ def main():
         enriched.append(m)
 
     summary = _summarize(enriched)
-    md = _render_markdown(enriched, summary, since_dt, until_dt)
+
+    # フォロワー増加要因 分析
+    print(f"\n📈 フォロワー増加要因を分析中...")
+    follower_hist = fetch_follower_history(since_dt, until_dt)
+    attribution = attribute_followers_to_posts(enriched, follower_hist)
+    print(f"   現在 follower: {follower_hist.get('current', 0):,}  "
+          f"期間中 delta: {follower_hist.get('delta_in_period', 0):+,}")
+    print(f"   寄与度算出方式: {attribution.get('method')}")
+
+    md = _render_markdown(enriched, summary, since_dt, until_dt,
+                          follower_hist=follower_hist,
+                          attribution=attribution)
 
     out_path = PROJECT_DIR / args.out
     with open(out_path, "w", encoding="utf-8") as f:
@@ -302,9 +585,28 @@ def main():
 
     if args.json_out:
         json_path = PROJECT_DIR / args.json_out
+        # 投稿オブジェクトはそのまま、attribution の by_post に含まれる post 参照は重複なので除去
+        attr_serializable = {
+            "method": attribution.get("method"),
+            "by_post_type": attribution.get("by_post_type", {}),
+            "top_drivers": [
+                {"follows_estimated": d["follows_estimated"],
+                 "profile_visits": d["profile_visits"],
+                 "method": d["method"],
+                 "media_id": d["post"].get("id"),
+                 "permalink": d["post"].get("permalink"),
+                 "media_product_type": d["post"].get("media_product_type"),
+                 "media_type": d["post"].get("media_type")}
+                for d in attribution.get("top_drivers", [])
+            ],
+        }
         with open(json_path, "w", encoding="utf-8") as f:
-            json.dump({"summary": summary, "media": enriched},
-                      f, ensure_ascii=False, indent=2, default=str)
+            json.dump({
+                "summary": summary,
+                "follower_history": follower_hist,
+                "attribution": attr_serializable,
+                "media": enriched,
+            }, f, ensure_ascii=False, indent=2, default=str)
         print(f"✅ JSON保存: {json_path}")
 
     print("\n" + "=" * 60)

@@ -75,6 +75,15 @@ def _build_caption(stats: dict, handle: str = '@disney_ai_wait') -> str:
         park_name = 'ディズニーランド'
         tags = RECAP_HASHTAGS_LAND + RECAP_HASHTAGS_COMMON
 
+    try:
+        sys.path.insert(0, str(PROJECT_DIR / 'scripts'))
+        from trend_hashtags import get_trend_hashtags
+        trend_tags = get_trend_hashtags(date=date_str, max_n=4, exclude=tags)
+        if trend_tags:
+            tags = trend_tags + tags
+    except Exception:
+        pass
+
     acc = stats['accuracy_within_10']
     mae = stats['overall_mae']
     per_attr = stats['per_attr']

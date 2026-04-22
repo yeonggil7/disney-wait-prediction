@@ -1,0 +1,104 @@
+name: Instagram Hot Topic Story
+
+on:
+  schedule:
+    # 毎日 22:30 UTC = 翌日 07:30 JST
+    # disney_trend.yml (22:00 UTC) で生成された
+    # reports/disney_trend_{date}.json をそのまま再利用する。
+    # 同時間帯の通常 morning briefing とは別投稿で「速報感」を演出。
+    - cron: '30 22 * * *'
+
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '対象日 (YYYY-MM-DD、空欄は今日)'
+        required: false
+        default: ''
+      dry_run:
+        description: 'ドライラン (画像のみ生成)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  hot-topic-story:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Japanese fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk > /dev/null 2>&1
+          fc-cache -f
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Ensure today's trend JSON exists
+        env:
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
+        run: |
+          DATE_ARG="${{ github.event.inputs.date }}"
+          DATE_ARG="${DATE_ARG:-$(date +%Y-%m-%d)}"
+          JSON="reports/disney_trend_${DATE_ARG}.json"
+          if [ ! -f "$JSON" ]; then
+            echo "🔄 ${JSON} が無いので新規収集"
+            python scripts/generate_trend_digest.py --collect --no-image --no-md
+          else
+            echo "✅ ${JSON} を再利用"
+          fi
+
+      - name: Run hot-topic story post
+        env:
+          INSTAGRAM_API_MODE: ${{ secrets.INSTAGRAM_API_MODE }}
+          INSTAGRAM_GRAPH_BACKEND: ${{ secrets.INSTAGRAM_GRAPH_BACKEND }}
+          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
+          FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_APP_SECRET }}
+          IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
+        run: |
+          DATE_ARG="${{ github.event.inputs.date }}"
+          DRY_RUN="${{ github.event.inputs.dry_run }}"
+          DRY_RUN="${DRY_RUN:-false}"
+
+          ARGS="--mode hot_topic"
+          if [ -n "$DATE_ARG" ]; then
+            ARGS="$ARGS --date $DATE_ARG"
+          fi
+          if [ "$DRY_RUN" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          else
+            ARGS="$ARGS --post"
+          fi
+
+          echo "Running: python daily_story_post.py $ARGS"
+          python daily_story_post.py $ARGS
+
+      - name: Upload hot-topic image
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ig-hot-topic-${{ github.run_id }}
+          path: predictions_x/ig_story_hot_topic_*.png
+          retention-days: 30

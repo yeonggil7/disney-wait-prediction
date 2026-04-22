@@ -59,6 +59,15 @@ def _build_caption(df, park: str, handle: str = '@disney_ai_wait') -> str:
         park_name = 'ディズニーランド'
         tags = HASHTAGS_LAND + HASHTAGS_COMMON
 
+    try:
+        sys.path.insert(0, str(PROJECT_DIR / 'scripts'))
+        from trend_hashtags import get_trend_hashtags
+        trend_tags = get_trend_hashtags(max_n=4, exclude=tags)
+        if trend_tags:
+            tags = trend_tags + tags
+    except Exception:
+        pass
+
     sorted_df = df.sort_values('avg_wait').reset_index(drop=True)
     best = sorted_df.iloc[0]
     worst = sorted_df.iloc[-1]

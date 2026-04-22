@@ -50,19 +50,62 @@ HASHTAGS_LAND = [
 ]
 
 
+AB_REPORT_PATH = PROJECT_DIR / 'reports' / 'cover_ab.json'
+
+# 「勝者確定」と判定するしきい値
+#   - 両 variant とも n >= MIN_SAMPLES_PER_VARIANT
+#   - 3指標 (CTR / save_rate / views) 全てで同じ variant が勝っている
+MIN_SAMPLES_PER_VARIANT = 10
+
+
+def _load_ab_winner() -> str | None:
+    """reports/cover_ab.json から「3-of-3 で勝った variant」を返す。
+    十分なサンプルが無い / 引き分け / ファイル無し → None"""
+    try:
+        import json
+        with open(AB_REPORT_PATH, encoding='utf-8') as f:
+            data = json.load(f)
+        s = data.get('summary', {})
+        new = s.get('new', {})
+        old = s.get('old', {})
+        if min(new.get('n', 0), old.get('n', 0)) < MIN_SAMPLES_PER_VARIANT:
+            return None
+        new_ctr = new.get('ctr_pct', {}).get('mean', 0)
+        old_ctr = old.get('ctr_pct', {}).get('mean', 0)
+        new_save = new.get('save_rate', {}).get('mean', 0)
+        old_save = old.get('save_rate', {}).get('mean', 0)
+        new_views = new.get('views', {}).get('mean', 0)
+        old_views = old.get('views', {}).get('mean', 0)
+        n_wins = sum([new_ctr > old_ctr, new_save > old_save, new_views > old_views])
+        o_wins = sum([new_ctr < old_ctr, new_save < old_save, new_views < old_views])
+        if n_wins == 3:
+            return 'new'
+        if o_wins == 3:
+            return 'old'
+        return None
+    except Exception:
+        return None
+
+
 def resolve_cover_variant(date_str: str, park: str, mode: str) -> str:
     """
     A/B テスト用にカバーバリアントを決定。
 
-    'auto' のとき:
-      doy (年中の日数) と park のオフセットで交互割当。
-      → 1日2投稿 (sea+land) のうち必ず1つは old、もう1つは new に割り当てられる。
-        週単位でも各パークが ~3-4 ずつのバランスに収束。
+    優先順位:
+      1. mode が 'new' / 'old' なら強制
+      2. mode が 'auto' でも reports/cover_ab.json で勝者確定 (n>=10 & 3-of-3) なら勝者を返す
+      3. それ以外は従来通り doy×park で交互割当
 
     Returns: 'new' or 'old'
     """
     if mode in ('new', 'old'):
         return mode
+
+    if mode == 'auto':
+        winner = _load_ab_winner()
+        if winner is not None:
+            return winner
+
     try:
         doy = datetime.strptime(date_str, '%Y-%m-%d').timetuple().tm_yday
     except Exception:
@@ -85,6 +128,16 @@ def _build_caption(park: str, date_str: str,
         emoji = '🏰'
         park_name = 'ディズニーランド'
         tags = HASHTAGS_LAND + HASHTAGS_COMMON
+
+    # トレンド連動ハッシュタグを先頭に追加 (graceful: JSON 無くても動く)
+    try:
+        sys.path.insert(0, str(PROJECT_DIR / 'scripts'))
+        from trend_hashtags import get_trend_hashtags
+        trend_tags = get_trend_hashtags(date=date_str, max_n=4, exclude=tags)
+        if trend_tags:
+            tags = trend_tags + tags
+    except Exception:
+        pass
 
     lines = [
         f"{emoji} 30秒で分かる！",
@@ -155,7 +208,9 @@ def main():
     for park in parks:
         variant = resolve_cover_variant(date, park, args.cover_variant)
         variants[park] = variant
-        print(f"🧪 {park}: cover_variant = {variant} (mode={args.cover_variant})")
+        winner = _load_ab_winner()
+        winner_note = f" [A/B勝者確定→{winner}]" if winner and args.cover_variant == 'auto' else ""
+        print(f"🧪 {park}: cover_variant = {variant} (mode={args.cover_variant}){winner_note}")
         mp4, cover = generate_reel_video(date, park=park,
                                           duration=args.duration,
                                           bgm=args.bgm,

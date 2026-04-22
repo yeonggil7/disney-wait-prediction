@@ -625,6 +625,224 @@ def render_story_image(data: dict, output_path: str):
 
 
 # =============================================================================
+# 1080x1920 「今日のホットトピック」ストーリーズ画像
+# (フィードでは固定情報、ストーリーズでは "今この瞬間" のトレンド一点突破)
+# =============================================================================
+HOT_BG = '#0A1628'
+HOT_ACCENT = '#FF5E62'        # 燃える赤 (HOT 訴求)
+HOT_ACCENT_2 = '#FF9966'      # オレンジグラデ用
+HOT_GOLD = '#FCC85A'
+
+# トピック → カラー / メッセージ
+TOPIC_STYLES = {
+    "🎉 25周年・記念":       {"label": "25周年トピック", "color": '#FCC85A',
+                              "cta": "ジュビリー の最新動向"},
+    "🏰 新エリア・新アトラク": {"label": "新エリア",       "color": '#7B68EE',
+                              "cta": "新アトラク 速報"},
+    "🎁 グッズ・フード":      {"label": "グッズ/フード",   "color": '#FF6B9D',
+                              "cta": "限定アイテム情報"},
+    "🎪 イベント・期間限定":   {"label": "イベント",       "color": '#4ECDC4',
+                              "cta": "期間限定の見逃し厳禁"},
+    "💰 料金・チケット":      {"label": "料金/チケット",   "color": '#FFA500',
+                              "cta": "コスパ系の保存推奨"},
+    "👨‍👩‍👧 ファミリー・体験":  {"label": "体験レポ",       "color": '#95E1D3',
+                              "cta": "リアルな声をチェック"},
+    "🌟 著名人・トレンド":    {"label": "話題",           "color": '#F38181',
+                              "cta": "今 SNS で話題"},
+    "⚠️ トラブル・運休":     {"label": "運休/注意",      "color": '#E94560',
+                              "cta": "行く前に必読"},
+    "📰 その他":              {"label": "ディズニー速報",  "color": HOT_GOLD,
+                              "cta": "気になるディズニーニュース"},
+}
+
+
+def select_hot_topic(data: dict) -> dict | None:
+    """
+    最も注目度が高いトピック+ヘッドラインを選ぶ。
+      優先度 (高い順):
+        1. ⚠️ トラブル・運休 (フォロワー価値が最高)
+        2. 🎉 25周年・記念
+        3. 🏰 新エリア・新アトラク
+        4. 🎪 イベント・期間限定
+        5. 💰 料金・チケット
+        6. 🎁 グッズ・フード
+        7. その他
+      件数 2件以上のトピックを優先。
+    """
+    google_news = data.get("google_news", []) or []
+    extra = data.get("extra_feeds", []) or []
+    all_news = google_news + extra
+    if not all_news:
+        return None
+    cat = categorize_news(all_news)
+
+    priority = [
+        "⚠️ トラブル・運休",
+        "🎉 25周年・記念",
+        "🏰 新エリア・新アトラク",
+        "🎪 イベント・期間限定",
+        "💰 料金・チケット",
+        "🎁 グッズ・フード",
+        "👨‍👩‍👧 ファミリー・体験",
+        "🌟 著名人・トレンド",
+        "📰 その他",
+    ]
+
+    # まず件数2件以上 + 優先度の高いトピック
+    for t in priority:
+        if t in cat and len(cat[t]) >= 2:
+            return {"topic": t, "items": cat[t]}
+    # 次に1件でもあるもの
+    for t in priority:
+        if t in cat:
+            return {"topic": t, "items": cat[t]}
+    return None
+
+
+def render_hot_topic_story_image(data: dict, output_path: str) -> bool:
+    """
+    1080x1920 の「今日のホットトピック」ストーリーズ画像を生成。
+      - 1トピックに絞り込んだ大きな見出し+3件のヘッドライン
+      - 強いビジュアル (HOT バッジ・グラデ背景)
+      - 下部 CTA: "詳しくはフィードへ" / "@disney_ai_wait"
+
+    トピックが拾えなかったら False を返して呼び出し側で投稿スキップ。
+    """
+    hot = select_hot_topic(data)
+    if not hot:
+        return False
+
+    topic = hot["topic"]
+    items = hot["items"]
+    style = TOPIC_STYLES.get(topic, TOPIC_STYLES["📰 その他"])
+    accent = style["color"]
+    cta = style["cta"]
+
+    fig = plt.figure(figsize=(10.8, 19.2), dpi=100)
+    fig.patch.set_facecolor(HOT_BG)
+
+    today_jp = datetime.now().strftime("%-m月%-d日")
+    today_dow = ["月", "火", "水", "木", "金", "土", "日"][datetime.now().weekday()]
+
+    # ───── 上部グラデーション帯 (アテンション) ─────
+    grad_ax = fig.add_axes([0, 0.85, 1, 0.15])
+    grad_ax.set_xlim(0, 1); grad_ax.set_ylim(0, 1); grad_ax.axis('off')
+    import numpy as np
+    grad = np.linspace(0, 1, 256).reshape(1, -1)
+    grad = np.vstack([grad] * 16)
+    from matplotlib.colors import LinearSegmentedColormap
+    cmap = LinearSegmentedColormap.from_list(
+        "hot", [HOT_ACCENT, HOT_ACCENT_2, accent], N=256)
+    grad_ax.imshow(grad, aspect='auto', cmap=cmap, extent=[0, 1, 0, 1], alpha=0.92)
+    # HOT バッジ
+    grad_ax.add_patch(FancyBboxPatch(
+        (0.04, 0.18), 0.20, 0.55,
+        boxstyle="round,pad=0.01,rounding_size=0.04",
+        facecolor='#FFFFFF', edgecolor='none'))
+    grad_ax.text(0.14, 0.45, "HOT", fontsize=42, fontweight='bold',
+                 color=HOT_ACCENT, ha='center', va='center')
+    grad_ax.text(0.97, 0.55, f"{today_jp}({today_dow})",
+                 fontsize=22, color='white', ha='right', va='center',
+                 fontweight='bold')
+    grad_ax.text(0.97, 0.22, "今日のディズニー速報",
+                 fontsize=14, color='white', ha='right', va='center',
+                 alpha=0.92)
+
+    # ───── トピックラベル + 見出し ─────
+    title_ax = fig.add_axes([0.06, 0.66, 0.88, 0.18])
+    title_ax.set_xlim(0, 1); title_ax.set_ylim(0, 1); title_ax.axis('off')
+    title_ax.add_patch(FancyBboxPatch(
+        (0, 0), 1, 1, boxstyle="round,pad=0.01,rounding_size=0.05",
+        facecolor='#FFFFFF', edgecolor=accent, linewidth=5))
+
+    # トピックバッジ (パーク名のような扱い)
+    title_ax.add_patch(FancyBboxPatch(
+        (0.04, 0.72), 0.55, 0.22,
+        boxstyle="round,pad=0.005,rounding_size=0.04",
+        facecolor=accent, edgecolor='none'))
+    title_ax.text(0.315, 0.83, style["label"],
+                  fontsize=22, fontweight='bold',
+                  color='white', ha='center', va='center')
+
+    # メインヘッドライン (1件目を大きく)
+    main = items[0]
+    main_title = main.get("title", "")
+    # 自然な改行: 30文字程度で折り返し
+    def _wrap(s, n=22):
+        out, line = [], ""
+        for ch in s:
+            line += ch
+            if len(line) >= n and ch in "、。！？・ 　":
+                out.append(line); line = ""
+        if line:
+            out.append(line)
+        return "\n".join(out[:3]) + ("…" if len(out) > 3 else "")
+
+    title_ax.text(0.04, 0.55, _wrap(main_title, 22),
+                  fontsize=28, fontweight='bold',
+                  color=TEXT_PRIMARY, ha='left', va='top')
+
+    # ───── サブヘッドライン (2-3件) ─────
+    sub_ax = fig.add_axes([0.06, 0.30, 0.88, 0.34])
+    sub_ax.set_xlim(0, 1); sub_ax.set_ylim(0, 1); sub_ax.axis('off')
+    sub_ax.add_patch(FancyBboxPatch(
+        (0, 0), 1, 1, boxstyle="round,pad=0.005,rounding_size=0.03",
+        facecolor='#FFFFFF', alpha=0.08, edgecolor=accent, linewidth=2))
+    sub_ax.text(0.04, 0.94, f"■ 関連ニュース ({len(items)}件)",
+                fontsize=18, fontweight='bold',
+                color='white', ha='left', va='top')
+
+    related = items[1:4] if len(items) > 1 else []
+    if related:
+        for j, n in enumerate(related):
+            y = 0.78 - j * 0.26
+            t = n.get("title", "")
+            src = n.get("source", "")
+            display = t[:46] + ("…" if len(t) > 46 else "")
+            sub_ax.add_patch(plt.Rectangle((0.03, y - 0.10), 0.005, 0.18,
+                                           facecolor=accent))
+            sub_ax.text(0.06, y + 0.05, display,
+                        fontsize=15, ha='left', va='top',
+                        color='white', fontweight='bold')
+            if src:
+                sub_ax.text(0.06, y - 0.07, f"— {src}",
+                            fontsize=11, ha='left', va='center',
+                            color=STORY_TEXT_MUTE)
+    else:
+        sub_ax.text(0.5, 0.45,
+                    "1件のヘッドラインのみ。\nメインを保存して回りましょう。",
+                    fontsize=14, ha='center', va='center',
+                    color=STORY_TEXT_MUTE, linespacing=1.6)
+
+    # ───── 下部 CTA ─────
+    cta_ax = fig.add_axes([0.06, 0.16, 0.88, 0.12])
+    cta_ax.set_xlim(0, 1); cta_ax.set_ylim(0, 1); cta_ax.axis('off')
+    cta_ax.add_patch(FancyBboxPatch(
+        (0, 0), 1, 1, boxstyle="round,pad=0.01,rounding_size=0.05",
+        facecolor=accent, edgecolor='none', alpha=0.92))
+    cta_ax.text(0.5, 0.68, f"★ {cta} ★",
+                fontsize=22, ha='center', va='center',
+                color='white', fontweight='bold')
+    cta_ax.text(0.5, 0.28, "詳しくは @disney_ai_wait のフィード →",
+                fontsize=15, ha='center', va='center',
+                color='white')
+
+    # ───── フッター (ハンドル + サイン) ─────
+    f_ax = fig.add_axes([0, 0.04, 1, 0.10])
+    f_ax.set_xlim(0, 1); f_ax.set_ylim(0, 1); f_ax.axis('off')
+    f_ax.text(0.5, 0.70, "@disney_ai_wait",
+              fontsize=26, ha='center', va='center',
+              color=HOT_GOLD, fontweight='bold')
+    f_ax.text(0.5, 0.30, "AI で予測 × 毎日アップデート",
+              fontsize=13, ha='center', va='center',
+              color=STORY_TEXT_MUTE)
+
+    fig.savefig(output_path, dpi=100, facecolor=fig.get_facecolor())
+    plt.close(fig)
+    return True
+
+
+# =============================================================================
 # CLI
 # =============================================================================
 def main():
