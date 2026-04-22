@@ -1,63 +1,9 @@
 {
-  "target_date": "2026-04-22",
-  "updated_at_jst": "2026-04-22 17:59 JST",
+  "target_date": "2026-04-23",
+  "updated_at_jst": "2026-04-22 18:03 JST",
   "predictions": {
-    "sea": {
-      "avg_wait": 65,
-      "congestion": null,
-      "calm_time": "09:00",
-      "peak_time": "10:00",
-      "top_attractions": [
-        {
-          "name": "アナとエルサ",
-          "wait": 170
-        },
-        {
-          "name": "ソアリン",
-          "wait": 140
-        },
-        {
-          "name": "ラプンツェル",
-          "wait": 90
-        },
-        {
-          "name": "ピーターパン",
-          "wait": 90
-        },
-        {
-          "name": "センター・オブ・ジ・アース",
-          "wait": 80
-        }
-      ]
-    },
-    "land": {
-      "avg_wait": 67,
-      "congestion": null,
-      "calm_time": "20:30",
-      "peak_time": "16:30",
-      "top_attractions": [
-        {
-          "name": "美女と野獣の物語",
-          "wait": 120
-        },
-        {
-          "name": "モンスターズ・インク",
-          "wait": 80
-        },
-        {
-          "name": "ミート・ミッキー",
-          "wait": 80
-        },
-        {
-          "name": "プーさんのハニーハント",
-          "wait": 80
-        },
-        {
-          "name": "ベイマックスのハッピーライド",
-          "wait": 80
-        }
-      ]
-    }
+    "sea": null,
+    "land": null
   },
   "trends": {
     "news": []
