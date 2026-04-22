@@ -1,0 +1,68 @@
+name: Instagram Adaptive Story (Weather/Event)
+
+# 毎朝 06:30 JST に「明日の天気・イベント」をチェックし、
+# 雨/猛暑/祝日・イベント のいずれかが該当すれば
+# 専用ストーリーを自動投稿。
+
+on:
+  schedule:
+    # 21:30 UTC = 06:30 JST
+    - cron: '30 21 * * *'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '対象日 YYYY-MM-DD (デフォルト: 翌日)'
+        required: false
+        default: ''
+      post:
+        description: '実投稿する (true/false)'
+        required: false
+        default: 'true'
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  adaptive-story:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate & post adaptive story
+        env:
+          INSTAGRAM_API_MODE: graph
+          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_GRAPH_BACKEND: ${{ secrets.INSTAGRAM_GRAPH_BACKEND }}
+          IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
+        run: |
+          DATE_INPUT="${{ github.event.inputs.date }}"
+          DATE="${DATE_INPUT:-$(date -d 'tomorrow' +%Y-%m-%d 2>/dev/null || date -v+1d +%Y-%m-%d)}"
+          POST="${{ github.event.inputs.post }}"
+          POST="${POST:-true}"
+          ARGS="--date $DATE"
+          if [ "$POST" = "true" ]; then
+            ARGS="$ARGS --post"
+          fi
+          python scripts/post_adaptive_story.py $ARGS
+
+      - name: Upload generated image
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: adaptive-story-${{ github.run_id }}
+          path: predictions_x/adaptive_*.png
+          retention-days: 14
+          if-no-files-found: ignore

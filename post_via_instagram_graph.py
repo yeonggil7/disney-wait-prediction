@@ -353,7 +353,12 @@ class InstagramGraphPoster:
             return False
 
     # -------------------------------------------------------------------------
-    def post_carousel(self, image_paths: list, caption: str = "") -> bool:
+    def post_carousel(self, image_paths: list, caption: str = "",
+                       extra: dict = None) -> bool:
+        """
+        Args:
+            extra: 投稿ログに残す任意メタデータ (hook_variant 等、A/B 集計用)
+        """
         if not self._check_credentials():
             return False
         if not (2 <= len(image_paths) <= 10):
@@ -383,7 +388,7 @@ class InstagramGraphPoster:
             media_id = self._publish(carousel_cid)
             self._log(f"✅ カルーセル投稿完了: media_id={media_id}")
             self._record_post(media_id, "carousel",
-                              ";".join(image_paths), caption)
+                              ";".join(image_paths), caption, extra=extra)
             return True
         except Exception as e:
             print(f"❌ カルーセル投稿エラー: {e}")
@@ -428,8 +433,10 @@ class InstagramGraphPoster:
             self._wait_for_container(cid, timeout=300)
             media_id = self._publish(cid)
             self._log(f"✅ Reels投稿完了: media_id={media_id}")
+            extra_with_path = dict(extra or {})
+            extra_with_path.setdefault("video_path", video_path)
             self._record_post(media_id, "reel", video_path, caption,
-                              extra=extra)
+                              extra=extra_with_path)
             return True
         except Exception as e:
             print(f"❌ Reels投稿エラー: {e}")

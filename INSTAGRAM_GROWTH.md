@@ -37,6 +37,33 @@
 
 ---
 
+## 🚀 グロース v3 アップデート (2026-04 実施)
+
+| 改善 | 機能 |
+|---|---|
+| **G** 最適投稿時間 自動分析 (`scripts/best_time_analyzer.py`) | 過去30日の reach / save 率を曜日 × 3時間帯 で集計、TOP5 + 推奨 cron を出力 (週次 `instagram_insights.yml` に組込) |
+| **H** トレンド連動 BGM 自動切替 (`scripts/trending_bgm_selector.py`) | Hot Topic・天気・イベント に応じて BGM の bpm/key/装飾 を 5ムードから動的選択。Reels の `--bgm trending` で利用 |
+| **I** カルーセル 1枚目フックの A/B (`scripts/generate_carousel_hook.py` + `carousel_hook_ab_report.py`) | V1 好奇心 / V2 数字 / V3 警告 / V4 CTA の 4変種をローテ → save率で自動勝者ロック |
+| **J** Threads クロスポスト自動化 (`scripts/post_to_threads.py` + `cross_post_threads_from_ig.py`) | IG 投稿の 60〜90分後に Threads にも自動投稿 (`threads_crosspost.yml`) |
+| **K** 天候・特別日アダプティブ投稿 (`scripts/weather_adaptive.py`) | Open-Meteo + 内蔵祝日カレンダーで「雨/猛暑/イベント」専用ストーリー自動生成 |
+| **L** コメント FAQ 自動返信 (`scripts/auto_reply_comments.py`) | 10種類のFAQパターン (精度/データ元/雨/子連れ/おすすめ等) に丁寧に自動返信。`INSTAGRAM_AUTO_REPLY_ENABLED=true` で実投稿 |
+| **M** TikTok / YouTube Shorts クロスポスト (`scripts/cross_post_tiktok.py` + `cross_post_youtube_shorts.py`) | 直近 IG Reels を TikTok 下書き / YT Shorts に自動アップ (`multi_platform_crosspost.yml`) |
+| **N** 雨予報トリガー「雨の日ストーリー」 | K の派生。雨 PoP≥60% or 5mm 以上で 06:30 JST に「屋内アトラクTOP5+Tips」を自動配信 (`instagram_adaptive_story.yml`) |
+| **O** 公開ダッシュボード Web (Linktree 代替) | `dashboard/` 一式 + `scripts/build_dashboard_data.py` を GitHub Pages デプロイ。bio リンク差し替えで「予測+ホットトピック+リンク集」を1ページに集約 |
+
+### 必要な追加 GitHub Secrets
+
+| Secret | 用途 | 必須? |
+|---|---|---|
+| `THREADS_USER_ID` / `THREADS_ACCESS_TOKEN` | Threads クロスポスト (J) | 任意 |
+| `INSTAGRAM_AUTO_REPLY_ENABLED=true` | コメント FAQ 自動返信 を実投稿モードで有効化 (L) | 任意 |
+| `YOUTUBE_CLIENT_ID` / `YOUTUBE_CLIENT_SECRET` / `YOUTUBE_REFRESH_TOKEN` | YT Shorts クロスポスト (M) | 任意 |
+| `TIKTOK_ACCESS_TOKEN` / `TIKTOK_OPEN_ID` / `TIKTOK_DIRECT_POST` | TikTok クロスポスト (M) | 任意 |
+
+→ いずれも **未設定なら自動でスキップ** されるため、IG だけの運用は影響を受けません。
+
+---
+
 ## ① 答え合わせ投稿 — `daily_recap_post.py`
 
 「昨日のAI予測 vs 実測」を比較するインフォグラフィック (1080x1350)。

@@ -1,0 +1,82 @@
+name: Threads Cross-post (from IG)
+
+# IG 投稿系ワークフローの直後に走らせ、未送信のものを Threads にもクロスポスト。
+# - 投稿系ワークフロー (instagram_post / instagram_reel / instagram_recap) の終了後に
+#   workflow_run トリガーで実行
+# - 失敗しても IG 側に影響しない (always-success)
+
+on:
+  schedule:
+    # 毎日 22:50 UTC (07:50 JST) — 朝の Hot Topic / 各種投稿の後
+    # + 12:50 UTC (21:50 JST) — 夜の Reel/Recap 投稿の後
+    - cron: '50 22 * * *'
+    - cron: '50 12 * * *'
+  workflow_dispatch:
+    inputs:
+      within_min:
+        description: '直近何分の IG 投稿をクロスポストするか'
+        required: false
+        default: '60'
+      text_only:
+        description: '画像をクロスポストせずテキストのみ (true/false)'
+        required: false
+        default: 'false'
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  crosspost:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Threads connection check
+        env:
+          THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+        run: |
+          if [ -z "$THREADS_USER_ID" ] || [ -z "$THREADS_ACCESS_TOKEN" ]; then
+            echo "⏭ THREADS_* secrets 未設定 — スキップ"
+            exit 0
+          fi
+          python scripts/post_to_threads.py --check || true
+
+      - name: Cross-post recent IG → Threads
+        env:
+          THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
+        run: |
+          if [ -z "$THREADS_USER_ID" ] || [ -z "$THREADS_ACCESS_TOKEN" ]; then
+            echo "⏭ THREADS_* secrets 未設定 — スキップ"
+            exit 0
+          fi
+          WITHIN="${{ github.event.inputs.within_min }}"
+          WITHIN="${WITHIN:-90}"
+          ARGS="--within-min $WITHIN"
+          if [ "${{ github.event.inputs.text_only }}" = "true" ]; then
+            ARGS="$ARGS --text-only"
+          fi
+          python scripts/cross_post_threads_from_ig.py $ARGS
+
+      - name: Commit dedup log
+        if: always()
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add logs/threads_crosspost_done.json threads_post_log.csv 2>/dev/null || true
+          git commit -m "chore: threads crosspost log [skip ci]" || echo "no changes"
+          git push || echo "push failed"

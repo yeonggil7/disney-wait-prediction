@@ -1,0 +1,86 @@
+name: Cross-post Reels to TikTok / YT Shorts
+
+# IG Reels 投稿の30分後に走り、未送信の Reels を
+# TikTok / YouTube Shorts にもクロスポスト。
+# どちらも secrets が無ければ自動スキップ。
+
+on:
+  schedule:
+    # 13:00 UTC = 22:00 JST (Reel 21:30 JST の 30分後)
+    - cron: '0 13 * * *'
+  workflow_dispatch:
+    inputs:
+      within_min:
+        description: '何分以内のReelを対象にするか'
+        required: false
+        default: '90'
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  youtube:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install google-api-python-client google-auth google-auth-oauthlib
+      - name: Cross-post to YouTube Shorts
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          if [ -z "$YOUTUBE_REFRESH_TOKEN" ]; then
+            echo "⏭ YT secrets 未設定 — スキップ"; exit 0
+          fi
+          WITHIN="${{ github.event.inputs.within_min }}"
+          WITHIN="${WITHIN:-90}"
+          python scripts/cross_post_youtube_shorts.py --within-min "$WITHIN"
+      - name: Commit dedup log
+        if: always()
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add logs/youtube_crosspost_done.json 2>/dev/null || true
+          git commit -m "chore: yt crosspost log [skip ci]" || echo "no changes"
+          git push || echo "push failed"
+
+  tiktok:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Cross-post to TikTok
+        env:
+          TIKTOK_ACCESS_TOKEN: ${{ secrets.TIKTOK_ACCESS_TOKEN }}
+          TIKTOK_OPEN_ID: ${{ secrets.TIKTOK_OPEN_ID }}
+          TIKTOK_DIRECT_POST: ${{ secrets.TIKTOK_DIRECT_POST }}
+          IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
+        run: |
+          if [ -z "$TIKTOK_ACCESS_TOKEN" ]; then
+            echo "⏭ TikTok secrets 未設定 — スキップ"; exit 0
+          fi
+          WITHIN="${{ github.event.inputs.within_min }}"
+          WITHIN="${WITHIN:-90}"
+          python scripts/cross_post_tiktok.py --within-min "$WITHIN"
+      - name: Commit dedup log
+        if: always()
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add logs/tiktok_crosspost_done.json 2>/dev/null || true
+          git commit -m "chore: tiktok crosspost log [skip ci]" || echo "no changes"
+          git push || echo "push failed"

@@ -103,6 +103,33 @@ def _resolve_bgm(bgm: str, park: str, duration: float, tmpdir: str):
         except Exception as e:
             print(f"⚠️ BGM 自動生成失敗: {e}")
             return None
+    if bgm.lower() == 'trending':
+        # トレンド連動 BGM (mood に応じて bpm/key/装飾を切替)
+        try:
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            from scripts.trending_bgm_selector import generate_trending_bgm
+            from datetime import datetime
+            today = datetime.now().strftime('%Y-%m-%d')
+            out_wav = os.path.join(tmpdir, f"_bgm_trending_{park}.wav")
+            try:
+                from scripts.weather_adaptive import fetch_weather, detect_event
+                weather = fetch_weather(today)
+                event = detect_event(today)
+            except Exception:
+                weather = None; event = None
+            r = generate_trending_bgm(
+                today, park=park, duration=float(duration),
+                out_path=out_wav, weather=weather, event=event,
+            )
+            print(f"   🎵 trending mood = {r['mood']} ({r['reason']})")
+            return r['bgm_path']
+        except Exception as e:
+            print(f"⚠️ trending BGM 失敗 → auto にフォールバック: {e}")
+            out_wav = os.path.join(tmpdir, f"_bgm_{park}.wav")
+            try:
+                return generate_bgm_wav(out_wav, duration=float(duration), park=park)
+            except Exception:
+                return None
 
     # 明示パス
     if os.path.exists(bgm):

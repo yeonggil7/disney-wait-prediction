@@ -1,0 +1,73 @@
+name: Build & Deploy Dashboard (GitHub Pages)
+
+# 毎日 22:00 JST にダッシュボード JSON を生成 → GitHub Pages にデプロイ。
+# Linktree 代替 = bio リンクをこのページに貼ることで「Instagram から外への導線」を増やす。
+
+on:
+  schedule:
+    # 13:00 UTC = 22:00 JST (フィード予測投稿の少し後)
+    - cron: '0 13 * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'dashboard/**'
+      - 'scripts/build_dashboard_data.py'
+      - '.github/workflows/dashboard_build.yml'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '対象日 YYYY-MM-DD (空欄=翌日)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build dashboard JSON
+        run: |
+          DATE="${{ github.event.inputs.date }}"
+          ARGS=""
+          if [ -n "$DATE" ]; then ARGS="--date $DATE"; fi
+          python scripts/build_dashboard_data.py $ARGS || true
+          ls -la dashboard/data/ || true
+
+      - name: Commit JSON
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dashboard/data/ 2>/dev/null || true
+          git commit -m "chore: dashboard data $(date -u +%Y-%m-%d) [skip ci]" || echo "no changes"
+          git push || echo "push skipped"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dashboard
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

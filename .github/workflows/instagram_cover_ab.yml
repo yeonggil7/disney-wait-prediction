@@ -64,6 +64,25 @@ jobs:
           echo "Running: python scripts/cover_ab_report.py $ARGS"
           python scripts/cover_ab_report.py $ARGS
 
+      - name: Generate carousel hook A/B report
+        env:
+          INSTAGRAM_API_MODE: graph
+          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_GRAPH_BACKEND: ${{ secrets.INSTAGRAM_GRAPH_BACKEND }}
+        run: |
+          DAYS="${{ github.event.inputs.days }}"
+          DAYS="${DAYS:-21}"
+          STAMP=$(date -u +%Y-%m-%d)
+          OUT="reports/carousel_hook_ab_${STAMP}.md"
+          JSON_OUT="reports/carousel_hook_ab_${STAMP}.json"
+          # 勝者ロジック用のメインファイルも更新 (resolve_hook_variant が読む)
+          python scripts/carousel_hook_ab_report.py \
+            --days "$DAYS" \
+            --out "$OUT" --json "$JSON_OUT" || echo "⚠️ skipped"
+          # 勝者ロジック用に最新分を reports/carousel_hook_ab.json にもコピー
+          cp -f "$JSON_OUT" reports/carousel_hook_ab.json || true
+
       - name: Upload report
         uses: actions/upload-artifact@v4
         if: always()

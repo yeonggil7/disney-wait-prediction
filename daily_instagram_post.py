@@ -231,6 +231,10 @@ def main():
     parser.add_argument('--land-only', action='store_true', help='ランドのみ')
     parser.add_argument('--carousel', action='store_true',
                         help='シー+ランドを1つのカルーセル投稿にまとめる')
+    parser.add_argument('--hook', choices=['off', 'auto', 'V1_curiosity',
+                                            'V2_stat', 'V3_warning', 'V4_cta'],
+                        default='auto',
+                        help='カルーセル先頭にフック画像を追加 (A/Bテスト)')
     parser.add_argument('--story', action='store_true',
                         help='9:16 ストーリーズも投稿（追加投稿）')
     parser.add_argument('--output', '-o', default='predictions_x',
@@ -310,9 +314,45 @@ def main():
         if args.carousel and len(parks) > 1:
             # シー+ランドを1投稿に
             images = [feed_images[p] for p in parks if feed_images.get(p)]
+            hook_variant = None
+            if args.hook != 'off':
+                try:
+                    sys.path.insert(0, str(PROJECT_DIR / 'scripts'))
+                    from generate_carousel_hook import (
+                        generate_hook_image, resolve_hook_variant,
+                    )
+                    hook_variant = resolve_hook_variant(date, mode=args.hook)
+                    sea_avg = land_avg = None
+                    busiest = []
+                    for park in parks:
+                        ins = _get_insights(date, park)
+                        if ins:
+                            v = ins.get('avg_wait')
+                            if park == 'sea':
+                                sea_avg = v
+                            else:
+                                land_avg = v
+                            for nm, _ in (ins.get('attr_max_list') or [])[:3]:
+                                busiest.append(nm)
+                    hook_img = generate_hook_image(
+                        hook_variant, date,
+                        sea_avg=sea_avg, land_avg=land_avg,
+                        busiest_attractions=busiest,
+                    )
+                    print(f"   🪝 hook variant = {hook_variant}: {hook_img}")
+                    images = [hook_img] + images
+                except Exception as e:
+                    print(f"   ⚠️ hook 画像生成失敗 (継続): {e}")
             combo_caption = _build_carousel_caption(parks, date, captions)
             print(f"\n🎠 カルーセル投稿中（{len(images)}枚）...")
-            if poster.post_carousel(images, combo_caption):
+            extra_meta = {"carousel": True, "n_slides": len(images)}
+            if hook_variant:
+                extra_meta["hook_variant"] = hook_variant
+                extra_meta["target_date"] = date
+            ok = poster.post_carousel(images, combo_caption, extra=extra_meta) \
+                if 'extra' in poster.post_carousel.__code__.co_varnames \
+                else poster.post_carousel(images, combo_caption)
+            if ok:
                 posted += 1
         else:
             for park in parks:

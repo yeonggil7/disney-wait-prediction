@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="東京ディズニーリゾート 明日のAI待ち時間予測 — @disney_ai_wait の公開ダッシュボード">
+  <meta property="og:title" content="TDR AI 待ち時間予測ダッシュボード">
+  <meta property="og:description" content="毎日更新。明日のディズニーシー / ランドの混雑予測 + 過去の的中率を公開。">
+  <meta property="og:image" content="https://raw.githubusercontent.com/yeonggil777/disney-ai-wait/main/dashboard/og-image.png">
+  <title>🎢 TDR AI 予測ダッシュボード</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic',
+                    sans-serif;
+      background: linear-gradient(135deg, #0F1F3A 0%, #2B5876 100%);
+      color: white; min-height: 100vh; padding: 20px;
+    }
+    .container { max-width: 1080px; margin: 0 auto; }
+
+    header { text-align: center; padding: 40px 0; }
+    header h1 { font-size: clamp(28px, 5vw, 42px); margin-bottom: 8px; }
+    header p { color: #A3D8FF; font-size: 14px; }
+    .ig-link {
+      display: inline-block; margin-top: 16px;
+      background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+      color: white; padding: 10px 24px; border-radius: 24px;
+      text-decoration: none; font-weight: bold; font-size: 14px;
+    }
+    .ig-link:hover { transform: translateY(-2px); transition: 0.2s; }
+
+    .grid { display: grid; gap: 16px; margin-top: 24px; }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px; padding: 24px;
+      backdrop-filter: blur(10px);
+    }
+    .card h2 { font-size: 18px; margin-bottom: 16px;
+                color: #FFD23F; display: flex; align-items: center; gap: 8px; }
+    .card h2 .badge {
+      font-size: 10px; padding: 2px 8px; border-radius: 8px;
+      background: rgba(255,255,255,0.15); color: white; font-weight: normal;
+    }
+
+    .stat { display: flex; align-items: baseline; gap: 8px; }
+    .stat .num { font-size: 48px; font-weight: bold; color: #4ECDC4; }
+    .stat .unit { font-size: 16px; color: #A3D8FF; }
+
+    .park-card { padding: 20px; background: rgba(0,0,0,0.25); border-radius: 12px; }
+    .park-card h3 { font-size: 16px; margin-bottom: 12px; }
+    .park-card.sea h3 { color: #4ECDC4; }
+    .park-card.land h3 { color: #FF6B9D; }
+    .attr-row { display: flex; justify-content: space-between; align-items: center;
+                 padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .attr-row:last-child { border-bottom: none; }
+    .attr-row .name { font-size: 14px; }
+    .attr-row .wait { font-weight: bold; color: #FFD23F; }
+    .attr-row .wait.high { color: #FF6B6B; }
+    .attr-row .wait.low { color: #95E1D3; }
+
+    .news-item { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08);
+                  display: block; color: white; text-decoration: none; }
+    .news-item:hover { color: #FFD23F; }
+    .news-item .topic { font-size: 11px; color: #FFD23F; margin-bottom: 4px; }
+    .news-item .title { font-size: 14px; line-height: 1.4; }
+    .news-item .meta { font-size: 11px; color: #A3D8FF; margin-top: 4px; }
+
+    .insight-row { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .insight-row strong { color: #FFD23F; }
+
+    footer {
+      text-align: center; padding: 40px 20px 20px; font-size: 12px;
+      color: rgba(255,255,255,0.55);
+    }
+    footer a { color: #A3D8FF; }
+    .updated-time { color: #95E1D3; font-size: 12px; margin-top: 4px; }
+    .loading { text-align: center; padding: 40px; opacity: 0.5; }
+    .err { padding: 16px; background: rgba(255,107,107,0.15);
+            border-left: 4px solid #FF6B6B; border-radius: 4px; margin: 16px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎢 TDR AI 予測ダッシュボード</h1>
+      <p>東京ディズニーリゾート 明日の混雑をAIが毎日予測</p>
+      <a class="ig-link" href="https://www.instagram.com/disney_ai_wait/" target="_blank" rel="noopener">
+        📲 Instagram で詳細を見る (@disney_ai_wait)
+      </a>
+      <div class="updated-time" id="updated">読み込み中…</div>
+    </header>
+
+    <div id="content"><div class="loading">📡 最新データを取得中…</div></div>
+
+    <footer>
+      <p>このダッシュボードは <strong>毎晩 22:00 JST</strong> に自動更新されます。</p>
+      <p style="margin-top: 8px;">
+        🔮 AI 予測精度 (過去30日 ±15分以内): <span id="accuracy-foot">—</span>
+        ・ 公式情報: <a href="https://www.tokyodisneyresort.jp/" target="_blank" rel="noopener">tokyodisneyresort.jp</a>
+      </p>
+      <p style="margin-top: 8px;">
+        © @disney_ai_wait — Open data dashboard.  Source:
+        <a href="https://github.com/yeonggil777/disney-ai-wait" target="_blank" rel="noopener">GitHub</a>
+      </p>
+    </footer>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

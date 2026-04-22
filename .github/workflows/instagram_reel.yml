@@ -26,9 +26,9 @@ on:
         required: false
         default: '20'
       bgm:
-        description: "BGM ('auto' / 'none' / 音源パス)"
+        description: "BGM ('trending' = ムード自動 / 'auto' / 'none' / 音源パス)"
         required: false
-        default: 'auto'
+        default: 'trending'
       bgm_volume_db:
         description: 'BGM 音量 dB (例: -8, -12, -16)'
         required: false
@@ -104,7 +104,7 @@ jobs:
           DURATION="${DURATION:-20}"
 
           BGM="${{ github.event.inputs.bgm }}"
-          BGM="${BGM:-auto}"
+          BGM="${BGM:-trending}"
           BGM_VOL="${{ github.event.inputs.bgm_volume_db }}"
           BGM_VOL="${BGM_VOL:--8}"
 

@@ -1,0 +1,42 @@
+{
+  "since": "2026-04-01",
+  "n_total": 0,
+  "summary": {
+    "V1_curiosity": {
+      "n": 0,
+      "reach_sum": 0,
+      "reach_mean": 0,
+      "saves_sum": 0,
+      "save_rate_pct": 0.0,
+      "engagement_sum": 0,
+      "engagement_rate_pct": 0.0
+    },
+    "V2_stat": {
+      "n": 0,
+      "reach_sum": 0,
+      "reach_mean": 0,
+      "saves_sum": 0,
+      "save_rate_pct": 0.0,
+      "engagement_sum": 0,
+      "engagement_rate_pct": 0.0
+    },
+    "V3_warning": {
+      "n": 0,
+      "reach_sum": 0,
+      "reach_mean": 0,
+      "saves_sum": 0,
+      "save_rate_pct": 0.0,
+      "engagement_sum": 0,
+      "engagement_rate_pct": 0.0
+    },
+    "V4_cta": {
+      "n": 0,
+      "reach_sum": 0,
+      "reach_mean": 0,
+      "saves_sum": 0,
+      "save_rate_pct": 0.0,
+      "engagement_sum": 0,
+      "engagement_rate_pct": 0.0
+    }
+  }
+}

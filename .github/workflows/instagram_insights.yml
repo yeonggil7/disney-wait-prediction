@@ -63,6 +63,21 @@ jobs:
           echo "Running: python scripts/ig_insights_report.py $ARGS"
           python scripts/ig_insights_report.py $ARGS
 
+      - name: Generate best-time analysis
+        env:
+          INSTAGRAM_API_MODE: graph
+          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_GRAPH_BACKEND: ${{ secrets.INSTAGRAM_GRAPH_BACKEND }}
+        run: |
+          # 全体 / 投稿タイプ別 でベスト時間を出す (過去30日で集計)
+          for T in "" feed carousel reel story; do
+            ARGS="--days 30"
+            if [ -n "$T" ]; then ARGS="$ARGS --type $T"; fi
+            echo "▶ best_time_analyzer ($T)"
+            python scripts/best_time_analyzer.py $ARGS || echo "  ⚠️ skipped"
+          done
+
       - name: Upload report
         uses: actions/upload-artifact@v4
         if: always()

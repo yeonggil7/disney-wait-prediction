@@ -1,0 +1,69 @@
+name: Instagram Comment Auto Reply
+
+# 1日4回、未返信コメントに FAQ 自動返信。
+# INSTAGRAM_AUTO_REPLY_ENABLED=true の Secret が設定されていない限り
+# DRY-RUN (マッチ確認のみ・実投稿しない) で安全動作。
+
+on:
+  schedule:
+    # 09:00 JST, 13:00 JST, 18:00 JST, 22:00 JST
+    - cron: '0 0 * * *'
+    - cron: '0 4 * * *'
+    - cron: '0 9 * * *'
+    - cron: '0 13 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'DRY-RUN (返信しない)'
+        required: false
+        default: 'false'
+      media_limit:
+        description: '巡回投稿数'
+        required: false
+        default: '20'
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  auto-reply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run auto reply
+        env:
+          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_GRAPH_BACKEND: ${{ secrets.INSTAGRAM_GRAPH_BACKEND }}
+          INSTAGRAM_AUTO_REPLY_ENABLED: ${{ secrets.INSTAGRAM_AUTO_REPLY_ENABLED }}
+        run: |
+          DRY="${{ github.event.inputs.dry_run }}"
+          LIMIT="${{ github.event.inputs.media_limit }}"
+          LIMIT="${LIMIT:-20}"
+          ARGS="--media-limit $LIMIT"
+          if [ "$DRY" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python scripts/auto_reply_comments.py $ARGS
+
+      - name: Commit dedup log
+        if: always()
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add logs/auto_reply_done.json 2>/dev/null || true
+          git commit -m "chore: auto-reply dedup log [skip ci]" || echo "no changes"
+          git push || echo "push failed"
