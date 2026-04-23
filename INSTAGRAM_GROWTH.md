@@ -8,7 +8,7 @@
 
 | 種別 | スクリプト | スケジュール (JST) | GitHub Actions |
 |------|------------|-------------------|----------------|
-| **翌日予報フィード (carousel 1本)** | `daily_instagram_post.py --carousel` | 毎日 20:05 | `instagram_post.yml` |
+| **翌日予報フィード (シー / ランド 個別投稿)** | `daily_instagram_post.py` | 毎日 20:05 | `instagram_post.yml` |
 | **答え合わせ** | `daily_recap_post.py` | 毎日 11:30 | `instagram_recap.yml` |
 | **週間混雑ランキング** | `weekly_ranking_post.py` | 日曜 21:00 | `instagram_weekly.yml` |
 | **ストーリーズ朝briefing** | `daily_story_post.py --mode morning` | 毎日 07:30 | `instagram_story.yml` |
@@ -19,8 +19,8 @@
 | **カバー A/B レポート** | `scripts/cover_ab_report.py` | 月曜 10:00 | `instagram_cover_ab.yml` |
 | **トレンドダイジェスト** | `scripts/generate_trend_digest.py` | 毎日 07:00 | `disney_trend.yml` |
 
-合計で **週20〜25投稿（フィード + ストーリーズ + リール）** がフルオートで回ります。
-※ フィードは「品質特化」のため 1日1本 (carousel) に削減。リール/ストーリーズに重点配分。
+合計で **週25〜30投稿（フィード + ストーリーズ + リール）** がフルオートで回ります。
+※ フィードはシー/ランドを別々の投稿として送信 (1日2本 = グリッドが交互カラーで映える運用)。
 
 ---
 
@@ -33,7 +33,7 @@
 | **C** トレンド連動ハッシュタグ自動挿入 (`scripts/trend_hashtags.py`) | 全フィード/リール/ランキング投稿の冒頭タグを今日のニュースで動的生成 |
 | **D** プロフィール最適化 (`PROFILE_OPTIMIZATION.md` + `scripts/generate_profile_mock.py`) | bio / ハイライト / アクションボタン の改善案 + ビジュアルモック |
 | **E** 週次レポートに「フォロワー増加要因分析」セクション追加 | 投稿レベルの `follows` メトリクス + 投稿タイプ別効率 |
-| **F** フィード投稿を 1日2本 → 1本 (carousel) に削減 | 平均エンゲージメント率の向上を狙う |
+| **F** フィード投稿モード切替可能化 (default = シー/ランド 個別投稿) | グリッドのカラー交互配置 + 各パーク 単独で検索ヒット |
 
 ---
 

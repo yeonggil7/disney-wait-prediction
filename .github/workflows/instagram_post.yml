@@ -12,14 +12,14 @@ on:
         required: false
         default: ''
       mode:
-        description: '投稿モード (default=carousel: 1日1投稿に絞って品質特化)'
+        description: '投稿モード (default=feed: シー/ランドを別々のフィード投稿として送る)'
         required: false
-        default: 'carousel'
+        default: 'feed'
         type: choice
         options:
-          - carousel      # 推奨: シー＋ランドを1投稿のカルーセル化 (1投稿/日)
+          - feed          # 推奨: シー + ランド 個別投稿 (2投稿/日)
+          - carousel      # シー＋ランドを1投稿のカルーセル化 (1投稿/日)
           - auto_alt      # 曜日でシー/ランド交互 (1投稿/日)
-          - feed          # シー+ランド 個別投稿 (2投稿/日 = 旧設定)
           - feed_story    # フィード + ストーリーズ
           - sea_only
           - land_only
@@ -98,8 +98,8 @@ jobs:
           echo "Prediction date: $DATE_ARG"
 
           MODE="${{ github.event.inputs.mode }}"
-          # スケジュール起動時は default=carousel (1日1投稿/品質特化)
-          MODE="${MODE:-carousel}"
+          # スケジュール起動時は default=feed (シー/ランド を 個別投稿で送る)
+          MODE="${MODE:-feed}"
 
           DRY_RUN="${{ github.event.inputs.dry_run }}"
           DRY_RUN="${DRY_RUN:-false}"
@@ -112,6 +112,9 @@ jobs:
           fi
 
           case "$MODE" in
+            feed)
+              # シー + ランド を個別の単独投稿として送信 (2投稿/日)
+              ;;
             carousel)
               ARGS="$ARGS --carousel"
               ;;
