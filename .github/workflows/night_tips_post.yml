@@ -1,0 +1,50 @@
+name: Night Tips & Knowledge Post
+
+on:
+  schedule:
+    # 毎日 13:00 UTC = 日本時間 22:00 JST（夜の豆知識投稿）
+    - cron: '0 13 * * *'
+
+  workflow_dispatch:
+    inputs:
+      index:
+        description: '投稿インデックス（空欄=自動選択）'
+        required: false
+        default: ''
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  night-post:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Post night tips content
+        env:
+          X_POST_MODE: direct
+          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
+          TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
+          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
+        run: |
+          INDEX_ARG="${{ github.event.inputs.index }}"
+          if [ -n "$INDEX_ARG" ]; then
+            python night_x_post.py --post --index "$INDEX_ARG"
+          else
+            python night_x_post.py --post
+          fi

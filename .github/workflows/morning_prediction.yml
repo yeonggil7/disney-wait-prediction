@@ -1,0 +1,66 @@
+name: Morning TDR Prediction Post
+
+on:
+  schedule:
+    # 毎日 22:00 UTC = 日本時間 07:00 JST（当日の予測を朝に投稿）
+    - cron: '0 22 * * *'
+
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '予測日 (YYYY-MM-DD形式、空欄は今日)'
+        required: false
+        default: ''
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  morning-post:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Japanese fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk > /dev/null 2>&1
+          fc-cache -f
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run morning prediction and post to X
+        env:
+          X_POST_MODE: direct
+          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
+          TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
+          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_MODEL_REPO: ${{ secrets.HF_MODEL_REPO }}
+        run: |
+          DATE_ARG="${{ github.event.inputs.date }}"
+          if [ -z "$DATE_ARG" ]; then
+            DATE_ARG=$(date +%Y-%m-%d)
+          fi
+          echo "Prediction date: $DATE_ARG"
+          python morning_x_post.py --post --date "$DATE_ARG"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: morning-predictions-${{ github.run_id }}
+          path: predictions_x/
+          retention-days: 7

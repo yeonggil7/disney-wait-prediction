@@ -126,7 +126,7 @@ def _direct_post(text: str, image_paths: list = None, max_retries: int = 3) -> b
             tweet_id = response.data['id']
             suffix = "" if media_ids else "（テキストのみ）"
             print(f"✅ Xに投稿しました{suffix}: {tweet_id}")
-            return True
+            return tweet_id
 
         except tweepy.TooManyRequests:
             wait_time = 15 * 60 * (attempt + 1)
@@ -141,6 +141,80 @@ def _direct_post(text: str, image_paths: list = None, max_retries: int = 3) -> b
             return False
 
     return False
+
+
+def _direct_thread(tweets: list[dict], max_retries: int = 3):
+    """tweepy でスレッド（リプライチェーン）投稿"""
+    try:
+        import tweepy
+    except ImportError:
+        print("❌ tweepy がインストールされていません")
+        return []
+
+    if not all([TWITTER_API_KEY, TWITTER_API_SECRET,
+                TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET]):
+        print("❌ Twitter API 認証情報が不足")
+        return []
+
+    client = tweepy.Client(
+        consumer_key=TWITTER_API_KEY,
+        consumer_secret=TWITTER_API_SECRET,
+        access_token=TWITTER_ACCESS_TOKEN,
+        access_token_secret=TWITTER_ACCESS_TOKEN_SECRET,
+    )
+    auth = tweepy.OAuth1UserHandler(
+        TWITTER_API_KEY, TWITTER_API_SECRET,
+        TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET,
+    )
+    api = tweepy.API(auth)
+
+    posted_ids = []
+    reply_to = None
+
+    for i, item in enumerate(tweets):
+        text = item.get("text", "")
+        image_paths = item.get("images", [])
+
+        for attempt in range(max_retries):
+            try:
+                media_ids = []
+                for path in (image_paths or [])[:4]:
+                    if not os.path.exists(path):
+                        continue
+                    resized = _resize_for_x(path)
+                    try:
+                        media = api.media_upload(resized)
+                        media_ids.append(media.media_id)
+                    except Exception:
+                        pass
+
+                kwargs = {"text": text}
+                if media_ids:
+                    kwargs["media_ids"] = media_ids
+                if reply_to:
+                    kwargs["in_reply_to_tweet_id"] = reply_to
+
+                response = client.create_tweet(**kwargs)
+                tweet_id = response.data["id"]
+                posted_ids.append(tweet_id)
+                reply_to = tweet_id
+                print(f"  ✅ [{i+1}/{len(tweets)}] {tweet_id}")
+                time.sleep(2)
+                break
+
+            except tweepy.TooManyRequests:
+                wait = 15 * 60 * (attempt + 1)
+                print(f"  ⏳ レート制限 - {wait//60}分待機...")
+                if attempt < max_retries - 1:
+                    time.sleep(wait)
+                else:
+                    print(f"  ❌ [{i+1}] レート制限超過で中断")
+                    return posted_ids
+            except Exception as e:
+                print(f"  ❌ [{i+1}] エラー: {e}")
+                return posted_ids
+
+    return posted_ids
 
 
 # ---------------------------------------------------------------------------
@@ -304,15 +378,31 @@ def _xharness_post(text: str, image_paths: list = None, max_retries: int = 3) ->
 # Public API — mode dispatch
 # ---------------------------------------------------------------------------
 
-def post_to_twitter(text: str, image_paths: list = None, max_retries: int = 3) -> bool:
+def post_to_twitter(text: str, image_paths: list = None, max_retries: int = 3):
     """
-    X に投稿（モード自動切替）
-    - X_POST_MODE=xharness → X Harness Worker 経由
-    - X_POST_MODE=direct   → tweepy で直接 X API
+    X に投稿（モード自動切替）。成功時は tweet_id を返す（bool True も truthy）。
     """
     if X_POST_MODE == 'direct':
         return _direct_post(text, image_paths, max_retries)
     return _xharness_post(text, image_paths, max_retries)
+
+
+def post_thread(tweets: list[dict], max_retries: int = 3) -> list:
+    """
+    スレッド（リプライチェーン）を投稿。
+    tweets: [{"text": "...", "images": ["path", ...]}, ...]
+    戻り値: 投稿された tweet_id のリスト
+    """
+    if X_POST_MODE == 'direct':
+        return _direct_thread(tweets, max_retries)
+    posted = []
+    for item in tweets:
+        result = _xharness_post(item.get("text", ""), item.get("images"), max_retries)
+        if result:
+            posted.append(result)
+        else:
+            break
+    return posted
 
 
 def check_connection() -> bool:
