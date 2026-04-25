@@ -223,8 +223,10 @@ def main():
         print(f"🖼️  画像: {img}")
 
     if not images:
-        print("❌ 投稿対象がありません")
-        return 1
+        # データ未到着 (前日CSV未push 等) は CI を赤くせずスキップ
+        print("⚠️ 投稿対象がありません（実測データ未着のためスキップ）")
+        print("💡 ローカル daily_scrape.py が CSV を push 後、再実行してください")
+        return 0
 
     if args.post and not args.dry_run:
         from post_via_instagram import (

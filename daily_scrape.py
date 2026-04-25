@@ -81,6 +81,77 @@ def scrape_disneyland(year, month):
         log(f"❌ ランド スクレイピング エラー: {e}")
         return False
 
+def git_commit_and_push(year: int, month: int) -> bool:
+    """スクレイピングしたCSVをgit commit + pushしてGitHub Actionsから参照できるようにする。
+
+    - 対象: Disneysea/disneysea_daily_*.csv, Disneyland/disneyland_daily_*.csv,
+            および monthly 集計 csv/json/txt
+    - 既存ブランチに直接push (main想定)
+    - 失敗しても scrape 自体は成功扱いとする (戻り値で通知のみ)
+    """
+    log("📤 GitHub に push...")
+
+    paths = [
+        f"Disneysea/disneysea_daily_{year}-{month:02d}-*.csv",
+        f"Disneyland/disneyland_daily_{year}-{month:02d}-*.csv",
+        f"Disneysea/disneysea_monthly_*",
+        f"Disneyland/disneyland_monthly_*",
+    ]
+
+    try:
+        # 既存push権限が無い場合に備えて origin が https/ssh かを確認しない
+        # add → diff --cached でステージ確認 → commit → push
+        for p in paths:
+            subprocess.run(
+                ['bash', '-c', f'git add {p} 2>/dev/null || true'],
+                cwd=PROJECT_DIR, capture_output=True, text=True
+            )
+
+        diff = subprocess.run(
+            ['git', 'diff', '--cached', '--name-only'],
+            cwd=PROJECT_DIR, capture_output=True, text=True
+        )
+        staged = [l for l in diff.stdout.splitlines() if l.strip()]
+        if not staged:
+            log("   ⚪️ 変更なし (既に最新)")
+            return True
+
+        log(f"   📁 ステージ済み: {len(staged)} ファイル")
+
+        date_label = datetime.now().strftime('%Y-%m-%d')
+        msg = f"chore(data): daily scrape {date_label} [skip ci]"
+        commit = subprocess.run(
+            ['git', 'commit', '-m', msg],
+            cwd=PROJECT_DIR, capture_output=True, text=True
+        )
+        if commit.returncode != 0:
+            log(f"   ❌ commit 失敗: {commit.stderr.strip()[:300]}")
+            return False
+
+        # rebase して remote の最新を取り込んでから push
+        pull = subprocess.run(
+            ['git', 'pull', '--rebase', '--autostash', 'origin', 'main'],
+            cwd=PROJECT_DIR, capture_output=True, text=True
+        )
+        if pull.returncode != 0:
+            log(f"   ⚠️ pull --rebase 警告: {pull.stderr.strip()[:200]}")
+
+        push = subprocess.run(
+            ['git', 'push', 'origin', 'main'],
+            cwd=PROJECT_DIR, capture_output=True, text=True
+        )
+        if push.returncode != 0:
+            log(f"   ❌ push 失敗: {push.stderr.strip()[:300]}")
+            return False
+
+        log("   ✅ push 完了")
+        return True
+
+    except Exception as e:
+        log(f"   ❌ git 連携で例外: {e}")
+        return False
+
+
 def check_data_status():
     """データの状態を確認"""
     log("📊 データ状態確認...")
@@ -110,7 +181,9 @@ def main():
     parser.add_argument('--year', type=int, default=None, help='対象年 (デフォルト: 当月)')
     parser.add_argument('--month', type=int, default=None, help='対象月 (デフォルト: 当月)')
     parser.add_argument('--status', action='store_true', help='データ状態確認のみ')
-    
+    parser.add_argument('--no-push', action='store_true',
+                        help='git commit/push を行わない (デフォルト: scrape 成功時に自動 push)')
+
     args = parser.parse_args()
     
     # デフォルトは当月
@@ -150,9 +223,19 @@ def main():
         log(f"   {name}: {status}")
     
     check_data_status()
-    
-    # 全成功なら0、そうでなければ1
+
     all_success = all(success for _, success in results)
+
+    # CSVが新たに更新されていれば自動で git commit + push
+    # (scrape 1パークでも成功していれば push する)
+    any_success = any(success for _, success in results)
+    if any_success and not args.no_push:
+        log("")
+        log("=" * 60)
+        log("🔄 GitHub 同期")
+        log("=" * 60)
+        git_commit_and_push(year, month)
+
     sys.exit(0 if all_success else 1)
 
 if __name__ == "__main__":
