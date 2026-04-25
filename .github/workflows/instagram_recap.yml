@@ -2,8 +2,9 @@ name: Daily Instagram Recap
 
 on:
   schedule:
-    # 毎日 02:30 UTC = 日本時間 11:30 JST（前日のCSVが揃ったタイミング）
-    - cron: '30 2 * * *'
+    # 毎日 23:30 UTC = 日本時間 翌 08:30 JST
+    # ローカル daily_scrape (23:00 JST) → 自動 push 完了後に走るタイミング
+    - cron: '30 23 * * *'
 
   workflow_dispatch:
     inputs:
