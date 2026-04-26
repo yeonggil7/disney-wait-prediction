@@ -49,7 +49,7 @@ jobs:
           DATE="${{ github.event.inputs.date }}"
           ARGS=""
           if [ -n "$DATE" ]; then ARGS="--date $DATE"; fi
-          python scripts/build_dashboard_data.py $ARGS || true
+          python scripts/build_dashboard_data.py $ARGS
           ls -la dashboard/data/ || true
 
       - name: Commit JSON

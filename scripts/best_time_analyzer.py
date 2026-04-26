@@ -48,6 +48,7 @@ else:
     GRAPH_BASE = f"https://graph.facebook.com/{GRAPH_API_VERSION}"
 
 ACCESS_TOKEN = os.environ.get("INSTAGRAM_ACCESS_TOKEN", "")
+IG_USER_ID = os.environ.get("INSTAGRAM_BUSINESS_ACCOUNT_ID", "")
 DEFAULT_LOG = PROJECT_DIR / "instagram_post_log.csv"
 
 JST = timezone(timedelta(hours=9))
@@ -127,6 +128,79 @@ def load_posts(log_path: Path, since_dt: datetime,
                 "post_type": r.get("post_type", ""),
             })
     return rows
+
+
+def normalize_post_type(media: dict) -> str:
+    product_type = (media.get("media_product_type") or "").upper()
+    media_type = (media.get("media_type") or "").upper()
+    if product_type == "REELS":
+        return "reel"
+    if product_type == "STORY":
+        return "story"
+    if media_type == "CAROUSEL_ALBUM":
+        return "carousel"
+    return "feed"
+
+
+def load_posts_from_graph(since_dt: datetime,
+                          post_type_filter: str | None = None,
+                          limit_pages: int = 5) -> list:
+    """instagram_post_log.csv が無い環境向けに Graph API から投稿一覧を取得する。"""
+    if not IG_USER_ID or not ACCESS_TOKEN:
+        return []
+
+    fields = "id,media_type,media_product_type,timestamp,permalink"
+    posts = []
+    next_url = None
+    pages = 0
+    params = {"fields": fields, "limit": 25}
+
+    while pages < limit_pages:
+        if next_url:
+            r = requests.get(next_url, timeout=60)
+            if not r.ok:
+                break
+            data = r.json()
+        else:
+            data = _api_get(f"{IG_USER_ID}/media", params)
+
+        items = data.get("data", [])
+        if not items:
+            break
+
+        stop = False
+        for item in items:
+            try:
+                ts = datetime.fromisoformat(
+                    item["timestamp"].replace("Z", "+00:00")
+                )
+            except Exception:
+                continue
+            if ts < since_dt:
+                stop = True
+                break
+
+            post_type = normalize_post_type(item)
+            if post_type_filter and post_type != post_type_filter:
+                continue
+
+            posts.append({
+                "posted_at_utc": ts,
+                "posted_at_jst": ts.astimezone(JST),
+                "media_id": item.get("id", ""),
+                "post_type": post_type,
+                "permalink": item.get("permalink", ""),
+            })
+
+        if stop:
+            break
+        paging = data.get("paging", {})
+        next_url = paging.get("next")
+        if not next_url:
+            break
+        pages += 1
+
+    return posts
 
 
 def bucket_of(hour: int) -> str:
@@ -274,6 +348,9 @@ def main():
     since_dt = datetime.now(timezone.utc) - timedelta(days=args.days)
     posts = load_posts(Path(args.log), since_dt, post_type_filter=args.type)
     print(f"📥 ログ: {len(posts)}件 (since {since_dt.date()}, type={type_label})")
+    if not posts and ACCESS_TOKEN:
+        posts = load_posts_from_graph(since_dt, post_type_filter=args.type)
+        print(f"📥 Graph media fallback: {len(posts)}件")
 
     if args.dry_run:
         for p in posts:

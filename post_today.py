@@ -85,8 +85,9 @@ def main():
             return
     
     # daily_prediction.py を呼び出し
+    python_path = '/usr/bin/python3' if os.path.exists('/usr/bin/python3') else sys.executable
     cmd = [
-        sys.executable,
+        python_path,
         str(PROJECT_DIR / 'daily_prediction.py'),
         '--date', target_date,
     ]

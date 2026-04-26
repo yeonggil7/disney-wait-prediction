@@ -251,8 +251,15 @@ def generate_prediction_report(predictions, date, temperature, is_rainy, output_
     return report_text
 
 
+HEATMAP_TARGET_ATTRACTIONS_LAND = [
+    '美女と野獣の物語', 'モンスターズ', 'ミート・ミッキー',
+    'プーさんのハニーハント', 'ベイマックスのハッピーライド',
+    'ビッグサンダーマウンテン', 'スプラッシュマウンテン',
+]
+
+
 def generate_heatmap(predictions, date, output_dir="predictions"):
-    """待ち時間ヒートマップを生成（SNS映えデザイン）"""
+    """待ち時間ヒートマップを生成（人気アトラクションのみ・SNS映えデザイン）"""
     
     if not HAS_MATPLOTLIB:
         print("⚠️ matplotlibがないためヒートマップは生成できません")
@@ -268,6 +275,12 @@ def generate_heatmap(predictions, date, output_dir="predictions"):
         (predictions['time'] >= '09:00') & 
         (predictions['time'] <= '21:00')
     ].copy()
+    
+    # 人気アトラクションのみにフィルタ
+    target_mask = predictions_filtered['attraction_name'].apply(
+        lambda name: any(t in name for t in HEATMAP_TARGET_ATTRACTIONS_LAND)
+    )
+    predictions_filtered = predictions_filtered[target_mask]
     
     # ピボットテーブル作成
     pivot = predictions_filtered.pivot_table(
@@ -291,19 +304,21 @@ def generate_heatmap(predictions, date, output_dir="predictions"):
     ]
     custom_cmap = LinearSegmentedColormap.from_list('disney_vibrant', colors_vibrant, N=256)
     
-    # ダークパープル背景（ランド用）
-    fig, ax = plt.subplots(figsize=(20, 14), facecolor='#1a1a2e')
+    # アトラクション数に合わせたサイズ
+    n_attractions = len(pivot)
+    fig_height = max(6, n_attractions * 0.8 + 3)
+    fig, ax = plt.subplots(figsize=(18, fig_height), facecolor='#1a1a2e')
     ax.set_facecolor('#1a1a2e')
     
     if HAS_SEABORN:
-        # カスタムアノテーション設定
+        font_size = 12 if n_attractions <= 12 else 10
         sns.heatmap(
             pivot, 
             ax=ax,
             cmap=custom_cmap,
             annot=True,
             fmt='.0f',
-            annot_kws={'fontsize': 10, 'fontweight': 'bold', 'color': 'white'},
+            annot_kws={'fontsize': font_size, 'fontweight': 'bold', 'color': 'white'},
             cbar_kws={'label': '予測待ち時間 (分)', 'shrink': 0.8},
             linewidths=2,
             linecolor='#1a1a2e',

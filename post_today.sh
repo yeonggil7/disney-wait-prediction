@@ -20,17 +20,17 @@ case $choice in
     1)
         echo ""
         echo "📅 今日の予測を投稿します..."
-        python3 post_today.py
+        /usr/bin/python3 post_today.py
         ;;
     2)
         echo ""
         echo "📅 明日の予測を投稿します..."
-        python3 post_today.py --tomorrow
+        /usr/bin/python3 post_today.py --tomorrow
         ;;
     3)
         echo ""
         echo "🔍 投稿内容を確認します（投稿しません）..."
-        python3 post_today.py --dry-run
+        /usr/bin/python3 post_today.py --dry-run
         ;;
     q|Q)
         echo "終了します"

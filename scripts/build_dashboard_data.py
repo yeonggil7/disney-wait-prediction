@@ -46,12 +46,13 @@ def _safe_get_trends(date: str) -> dict:
     try:
         data = json.loads(p.read_text(encoding='utf-8'))
         news = []
-        for n in (data.get("news") or [])[:8]:
+        raw_news = data.get("news") or data.get("google_news") or []
+        for n in raw_news[:8]:
             news.append({
                 "title":     n.get("title", ""),
-                "url":       n.get("url", ""),
+                "url":       n.get("url") or n.get("link", ""),
                 "source":    n.get("source", ""),
-                "topic":     n.get("topic", "📰 その他"),
+                "topic":     n.get("topic") or n.get("query") or "📰 その他",
                 "published": n.get("published", ""),
             })
         return {"news": news}
@@ -112,6 +113,24 @@ def _safe_get_insights() -> dict:
         if not bullets and data.get("top_posts"):
             for p in (data.get("top_posts") or [])[:3]:
                 bullets.append(f"🏆 {p.get('post_type', '?')} 直近最高 reach {p.get('reach', 0)}")
+        if not bullets and data.get("summary"):
+            s = data.get("summary") or {}
+            bullets.append(
+                f"直近7日: {s.get('n_posts', 0)}投稿 / reach {s.get('total_reach', 0)}"
+            )
+            bullets.append(
+                f"保存率 {s.get('save_rate_pct', 0):.2f}% / シェア率 {s.get('share_rate_pct', 0):.2f}%"
+            )
+        if len(bullets) < 5 and data.get("media"):
+            ranked = sorted(
+                data.get("media") or [],
+                key=lambda p: (p.get("insights") or {}).get("reach", 0),
+                reverse=True,
+            )
+            for p in ranked[:3]:
+                ins = p.get("insights") or {}
+                kind = "REELS" if p.get("media_product_type") == "REELS" else "FEED"
+                bullets.append(f"🏆 {kind} reach {ins.get('reach', 0)}: {p.get('permalink', '')}")
         return {"bullets": bullets[:5]}
     except Exception:
         return {"bullets": []}
