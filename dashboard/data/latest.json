@@ -1,157 +1,16 @@
 {
-  "target_date": "2026-04-27",
-  "updated_at_jst": "2026-04-26 23:05 JST",
+  "target_date": "2026-04-29",
+  "updated_at_jst": "2026-04-28 00:07 JST",
   "predictions": {
-    "sea": {
-      "avg_wait": 70,
-      "congestion": "激混み",
-      "calm_time": "20:30",
-      "peak_time": "10:00",
-      "top_attractions": [
-        {
-          "name": "アナとエルサ",
-          "wait": 180
-        },
-        {
-          "name": "ソアリン",
-          "wait": 160
-        },
-        {
-          "name": "トイ・ストーリー・マニア！",
-          "wait": 120
-        },
-        {
-          "name": "ラプンツェル",
-          "wait": 120
-        },
-        {
-          "name": "ピーターパン",
-          "wait": 120
-        }
-      ]
-    },
-    "land": {
-      "avg_wait": 74,
-      "congestion": "激混み",
-      "calm_time": "20:30",
-      "peak_time": "10:00",
-      "top_attractions": [
-        {
-          "name": "美女と野獣の物語",
-          "wait": 120
-        },
-        {
-          "name": "ミート・ミッキー",
-          "wait": 100
-        },
-        {
-          "name": "プーさんのハニーハント",
-          "wait": 100
-        },
-        {
-          "name": "ベイマックスのハッピーライド",
-          "wait": 100
-        },
-        {
-          "name": "モンスターズ・インク",
-          "wait": 90
-        }
-      ]
-    }
+    "sea": null,
+    "land": null
   },
   "trends": {
-    "news": [
-      {
-        "title": "（写真）東京ディズニーシー25周年は“夜の景色”が圧巻！ ジュビリーブルーが映える幻想的な雰囲気がステキ＜取材レポ＞",
-        "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE9FOWgtYVVGaVZLckx1aGhfME9mZVg4UXpTMjVtclRxSGhOem54Z20yckRqVDNQdTduM3BJaFpzTHBFXy1HcXd1MXIwWFNhbjVoeUFCYlk1Rm1fTUJYUHNqOFVTOFU?oc=5",
-        "source": "クランクイン！",
-        "topic": "東京ディズニーシー",
-        "published": "2026-04-17 22:00"
-      },
-      {
-        "title": "東京ディズニーリゾート、駐車場料金を改定。普通車3000円→4000円に",
-        "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE9WVDlJQ2J1SzVTdFFHMkcwdFdBdzZyZ2FvUUxFbEFkSXo2WGhLMjI0NklTV0FudGw3alpWWGNGWmZ1Y3hxYmV1TGptSmNiMkozcDBOOWo0amZtc3h2dGk3OFN0WWpaclhL?oc=5",
-        "source": "トラベル Watch",
-        "topic": "東京ディズニーシー",
-        "published": "2026-04-17 10:37"
-      },
-      {
-        "title": "サタプラリサーチ ひとまず確かめに行く〜！【東京ディズニーシー25周年】",
-        "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE5hSlhUUlQtSlpXcHBSZ24xRjlESUpPWVZBeWtKUzVKR1Itb1d0MXM2WU5Hc1Y1d1V0YUtCNmh1UFIxd0VhRmQtTUVOaXllWkE4c21RSTZtWjAwNVVrMXVESmlIZE1VRDJZeEtQREJrY1U?oc=5",
-        "source": "MBS 毎日放送",
-        "topic": "東京ディズニーシー",
-        "published": "2026-04-18 00:33"
-      },
-      {
-        "title": "南原清隆、東京ディズニーシー満喫ショット まさかの現象に「カッコいい」「流石」の声（ENCOUNT）",
-        "url": "https://news.google.com/rss/articles/CBMif0FVX3lxTE44YmMwQnl3ODNMZFBabWhKM0JMbFZpbU00RXIyaTdrb0FIMXRIeXQzR1hwVUFCdXg1TlNRS3FpQ3FrWEg5QlJrcERIbzlSWTFPRTlLNUE1Z1k1MjZzYW9xRVdNaXhpWnpyTjZxVi1UVFhZRVR2SGttUGNrTElxTEE?oc=5",
-        "source": "Yahoo!ニュース",
-        "topic": "東京ディズニーシー",
-        "published": "2026-04-19 09:36"
-      },
-      {
-        "title": "南原清隆「目からビーム！？」 ２５周年のディズニーシーに大感激！「流石」「哀愁がすごい．．．」「ステキです」",
-        "url": "https://news.google.com/rss/articles/CBMijgFBVV95cUxQbG5rMTNRZTYtd1lFNWh3R0xOeEVfYjRjQzZucnlzT19jWmtLVmFRR1k1UFpGV243TURuWnBiTHQ2cm9meFZGUVJGaUJTd2dXVkFNYmRmRkhqZllWQ3NKZWFianFrUjFyZVE0QkZ5d29WbE1XX3pYZlZCOVJZRGpCa0VUYldNbFlsV3Z0b0JB0gGTAUFVX3lxTE9xVGZ4ejhtZWRpc1h6QXFmNjFULV93OGpzaFkwNFE1WWNjTGI0UG5hT1ZTaGxheFluc0lOMFNoeHJCbWN4cnVBOElqUThOU0VKZTR0VWdseU9XcHoyODZpU1NSZmRKV0Mwdjg3a2ZoNnRDRGFTWXJOWWVLaHQ0M0htTTNpM3Jrcm5FQk1kZEtIdlhLOA?oc=5",
-        "source": "ｄメニューニュース",
-        "topic": "東京ディズニーシー",
-        "published": "2026-04-19 05:28"
-      },
-      {
-        "title": "南原清隆、東京ディズニーシー満喫ショット まさかの現象に「カッコいい」「流石」の声",
-        "url": "https://news.google.com/rss/articles/CBMif0FVX3lxTE9SWFYyZDFoTXVNVlJCd2NxWTExeHdNNmhVOTVab2g4TW4zVkc0MTdjVFRMTGFNY1BUbGwtRlg5MDY1MFFYeXlxT1cwX25NMzYyX0NxSXRZLXJNenBudDNTaG9Dd1J6TGxpUnBQeFlCbmtxQW52NkxCR3QtdWVGLVU?oc=5",
-        "source": "プラメポータル",
-        "topic": "東京ディズニーシー",
-        "published": "2026-04-19 09:49"
-      },
-      {
-        "title": "東京ディズニーシー25周年は“夜の景色”が圧巻！ ジュビリーブルーが映える幻想的な雰囲気がステキ＜取材レポ＞",
-        "url": "https://news.google.com/rss/articles/CBMif0FVX3lxTE9sYXhCTDFUeWJWQkY5cVJkb3VQZmtXdzBGMWJBLWFLT0FtLWdwNVVxUExQQmxaNjBxbmdVSmpLMk50UTktSUItZGhkRHRBMlM2Q19Jc0xYcHJaVVBYY2pEZTM4MjluUzFfSTFfQTVxSlZiZEhDM1NpUXkyUnRpWDQ?oc=5",
-        "source": "Yahoo!ニュース",
-        "topic": "東京ディズニーランド",
-        "published": "2026-04-17 22:00"
-      },
-      {
-        "title": "【記事全文】和田アキ子 76歳で初の東京ディズニーランド満喫 思わず涙を流したアトラクション告白「ホッとする」",
-        "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxNZHRJeDFjbnFpVTNQVDFTcHY5RHd3Z3ptbTNrT2tvTEpyM0VVbVdVdmlqOGs1b0RZVG5Fdk5zX09jRXNPaThJdk94OWtKSmJjaTVPS1FnX3h5YVlzOU1QdnpzRDVIaXM4M2NKLWtwTEZmNTJtd0laQ3pQWFhFVVNacTlBbjFVT1dMZ2FTWFJXTV9RcVVLQk81a1djVQ?oc=5",
-        "source": "スポニチ Sponichi Annex",
-        "topic": "東京ディズニーランド",
-        "published": "2026-04-18 04:07"
-      }
-    ]
+    "news": []
   },
   "accuracy": {},
-  "best_time": {
-    "top": [
-      {
-        "weekday": "木",
-        "bucket": "21-24",
-        "reach_mean": 55.5,
-        "save_rate_pct": 0.0,
-        "n": 4
-      },
-      {
-        "weekday": "火",
-        "bucket": "21-24",
-        "reach_mean": 52,
-        "save_rate_pct": 0.0,
-        "n": 4
-      },
-      {
-        "weekday": "水",
-        "bucket": "21-24",
-        "reach_mean": 42,
-        "save_rate_pct": 0.0,
-        "n": 3
-      }
-    ]
-  },
+  "best_time": {},
   "insights": {
-    "bullets": [
-      "直近7日: 22投稿 / reach 710",
-      "保存率 0.00% / シェア率 0.00%",
-      "🏆 REELS reach 107: https://www.instagram.com/reel/DXejXAClT4e/",
-      "🏆 REELS reach 107: https://www.instagram.com/reel/DXZZaU6lJgq/",
-      "🏆 REELS reach 106: https://www.instagram.com/reel/DXejiWCCcOR/"
-    ]
+    "bullets": []
   }
 }
