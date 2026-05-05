@@ -41,6 +41,13 @@ from generate_x_heatmap import (
     LAND_DISPLAY_NAMES
 )
 
+from closing_time_helper import (
+    get_park_hours,
+    compute_pre_close_candidates,
+    format_close_judge_block_short,
+    format_pre_close_candidates,
+)
+
 # ---------------------------------------------------------------------------
 # 予測データ解析
 # ---------------------------------------------------------------------------
@@ -113,10 +120,19 @@ def _get_prediction_insights(date_str, park='sea'):
         # 全体平均
         insights['avg_wait'] = int(predictions['predicted_wait_time'].mean())
 
-        # 空いてる時間帯
-        avg_by_time = predictions.groupby('time')['predicted_wait_time'].mean()
-        calm_time = avg_by_time.idxmin()
-        insights['calm_time'] = calm_time
+        # 空いてる時間帯（参考値・午前/日中の最小）
+        # ※ 閉園 1 時間前以降は閉園前判定に切り替えるためここでは集計から除外
+        midday = predictions[predictions['time'] < '20:00']
+        if not midday.empty:
+            avg_by_time = midday.groupby('time')['predicted_wait_time'].mean()
+            insights['calm_time'] = avg_by_time.idxmin()
+        else:
+            insights['calm_time'] = None
+
+        # 閉園前判定用に予測 DF と short_names を保持
+        insights['_predictions'] = predictions
+        insights['_short_names'] = short
+        insights['_excluded'] = list(closures.keys())
 
         # 混雑度判定
         avg = insights['avg_wait']
@@ -164,10 +180,10 @@ TIPS_LAND = [
 ]
 
 CTA_VARIATIONS = [
-    "行く方はいいね❤️で！",
-    "保存📌して活用してね！",
-    "参考になったらRT🔄",
-    "フォロー✅で毎日お届け！",
+    "明日行く人はリプで「行く」って教えて！",
+    "一緒に行く人に送って作戦会議に使ってね",
+    "朝イチ派？夜狙い派？リプで教えて！",
+    "詳しいヒートマップは画像を保存して使ってね",
 ]
 
 WEEKEND_EXTRAS = [
@@ -185,7 +201,7 @@ def _is_weekend(date_str):
     return dt.weekday() >= 4  # 金土日
 
 
-def _build_tweet(park_emoji, park_name, date_str, insights, closures, display_names, tips, hashtags, cta_index=0):
+def _build_tweet(park_emoji, park_name, date_str, insights, closures, display_names, tips, hashtags, park_key, cta_index=0):
     """共通ツイート生成"""
     dt = datetime.strptime(date_str, '%Y-%m-%d')
     day_name = _get_weekday_ja(date_str)
@@ -193,7 +209,10 @@ def _build_tweet(park_emoji, park_name, date_str, insights, closures, display_na
     cta_seed = dt.timetuple().tm_yday + cta_index
     cta = CTA_VARIATIONS[cta_seed % len(CTA_VARIATIONS)]
 
-    tweet = f"{park_emoji} {park_name} AI待ち時間予測\n"
+    _, closing = get_park_hours(date_str, park_key)
+
+    tweet = f"{park_emoji} 明日{park_name}行く人へ\n\n"
+    tweet += f"{park_name} AI待ち時間予測\n"
     tweet += f"📅 {dt.month}/{dt.day}({day_name})"
 
     if insights:
@@ -208,8 +227,18 @@ def _build_tweet(park_emoji, park_name, date_str, insights, closures, display_na
         closed_names = [display_names.get(a, a)[:6] for a in closures.keys()]
         tweet += f"※休止: {', '.join(closed_names)}\n"
 
-    if insights:
-        tweet += f"⏰ 空き時間帯: {insights['calm_time']}〜\n"
+    # 閉園前判定（夜の候補）
+    if insights and insights.get('_predictions') is not None:
+        candidates = compute_pre_close_candidates(
+            insights['_predictions'],
+            closing_time=closing,
+            short_names=insights.get('_short_names', {}),
+            excluded=insights.get('_excluded', []),
+        )
+        if candidates:
+            tweet += "\n🌙 夜の候補:\n"
+            tweet += format_pre_close_candidates(candidates, closing_time=closing, max_n=2) + "\n"
+        tweet += format_close_judge_block_short(closing) + "\n"
 
     tweet += "\n"
     tweet += cta + "\n"
@@ -227,6 +256,7 @@ def create_sea_tweet(date_str):
         '🌊', 'ディズニーシー', date_str, insights, closures,
         SEA_DISPLAY_NAMES, TIPS_SEA,
         '#TDS #待ち時間 #TDR_now',
+        park_key='sea',
         cta_index=0,
     )
 
@@ -238,6 +268,7 @@ def create_land_tweet(date_str):
         '🏰', 'ディズニーランド', date_str, insights, closures,
         LAND_DISPLAY_NAMES, TIPS_LAND,
         '#TDL #待ち時間 #TDR_now',
+        park_key='land',
         cta_index=1,
     )
 
@@ -266,9 +297,32 @@ def _twitter_len(text):
     return count
 
 
+SECTION_HEADERS = ('🌙', '🚀', '⚠️', '📈', '🍱', '⛔')
+
+
+def _drop_orphaned_headers(lines):
+    """直後に詳細行(・/▸)が無い見出しを削除する。"""
+    cleaned = []
+    for i, line in enumerate(lines):
+        if line.startswith(SECTION_HEADERS):
+            # 次の非空行が ・ や ▸ で始まらないなら見出しを捨てる
+            j = i + 1
+            while j < len(lines) and lines[j].strip() == '':
+                j += 1
+            if j >= len(lines) or not lines[j].startswith(('・', '▸')):
+                continue
+        cleaned.append(line)
+    return cleaned
+
+
 def _trim_tweet(tweet):
-    """Twitter weighted count で 280 文字以内に収める"""
+    """Twitter weighted count で 280 文字以内に収める
+
+    優先度（残す順）: アトラクション(▸) > 閉園前判定(※) > 閉園前候補(・)
+                     > Tips/Weekend > 朝イチ等の見出し
+    """
     lines = tweet.split('\n')
+    lines = _drop_orphaned_headers(lines)
     # まず Tips/Weekend 行を削除
     while _twitter_len('\n'.join(lines)) > 280 and len(lines) > 5:
         for i, line in enumerate(lines):
@@ -277,10 +331,25 @@ def _trim_tweet(tweet):
                 break
         else:
             break
-    # まだ超えていればアトラクション行を末尾から削除
+    # 次に閉園前候補(・)を末尾から削除
     while _twitter_len('\n'.join(lines)) > 280 and len(lines) > 5:
         for i in range(len(lines) - 1, -1, -1):
-            if lines[i].startswith('▸'):
+            if lines[i].startswith('・'):
+                lines.pop(i)
+                break
+        else:
+            break
+    lines = _drop_orphaned_headers(lines)
+    # 残り超過分はアトラクション(▸)を末尾から削除（最低でも 2 個は残したい）
+    attr_lines = [i for i, l in enumerate(lines) if l.startswith('▸')]
+    while _twitter_len('\n'.join(lines)) > 280 and len(attr_lines) > 2:
+        idx = attr_lines.pop()
+        lines.pop(idx)
+        attr_lines = [i for i, l in enumerate(lines) if l.startswith('▸')]
+    # それでも超えるならその他の補足見出しから削る
+    while _twitter_len('\n'.join(lines)) > 280 and len(lines) > 4:
+        for i in range(len(lines) - 1, -1, -1):
+            if lines[i].startswith(SECTION_HEADERS):
                 lines.pop(i)
                 break
         else:

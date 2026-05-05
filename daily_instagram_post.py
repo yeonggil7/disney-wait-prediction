@@ -100,11 +100,21 @@ def _build_caption(park, date_str, insights=None):
         pass
 
     lines = []
+    lines.append(f"{emoji} 明日{name}行く人へ")
+    lines.append("朝の作戦会議はこの3つだけ見ればOK")
+    lines.append("")
     lines.append(f"{emoji} {name} AI待ち時間予測")
     lines.append(f"📅 {dt.month}月{dt.day}日({day}) の混雑予測")
     lines.append("")
 
     if insights:
+        if insights.get('attr_max_list'):
+            top_name, top_wait = insights['attr_max_list'][0]
+            lines.append(f"1. 最警戒: {top_name} 最大{top_wait}分")
+        lines.append(f"2. 空きやすい時間: {insights['calm_time']}頃")
+        if insights.get('peak_time'):
+            lines.append(f"3. ピーク: {insights['peak_time']}前後")
+        lines.append("")
         lines.append(f"{insights['congestion_emoji']} 全体の混雑度: {insights['congestion']}")
         lines.append(f"📊 平均待ち時間: 約{insights['avg_wait']}分")
         lines.append(f"⏰ 比較的空いてる時間: {insights['calm_time']}〜")
@@ -125,8 +135,10 @@ def _build_caption(park, date_str, insights=None):
 
     lines.append("―――――――――――――――")
     lines.append("📲 毎日20時に翌日の予測を投稿中")
+    lines.append("💬 朝イチ派 / 夜狙い派、コメントで教えてください")
+    lines.append("📩 一緒に行く人に送って作戦会議に使ってください")
+    lines.append("💾 保存して当日の回り方に役立てて♪")
     lines.append("👉 フォローはプロフィールから @disney_ai_wait")
-    lines.append("💾 保存しておいてプラン作成に役立てて♪")
     lines.append("")
     lines.append("※AIによる予測のため、実際の待ち時間とは異なる場合があります")
     lines.append("")
@@ -180,7 +192,8 @@ def _get_insights(date_str, park):
 
         avg_wait = int(predictions['predicted_wait_time'].mean())
         avg_by_time = predictions.groupby('time')['predicted_wait_time'].mean()
-        calm_time = avg_by_time.idxmin()
+        midday = avg_by_time[avg_by_time.index < '20:00']
+        calm_time = midday.idxmin() if not midday.empty else avg_by_time.idxmin()
         peak_time = avg_by_time.idxmax()
 
         if avg_wait >= 60:
@@ -404,6 +417,7 @@ def _build_carousel_caption(parks, date_str, captions):
     head.append(f"📅 {dt.month}月{dt.day}日({day})")
     head.append("")
     head.append("➡ スワイプでシー＆ランド両方をチェック！")
+    head.append("📩 一緒に行く人に送って、朝の作戦会議に使ってください")
     head.append("")
 
     body_parts = []
@@ -427,6 +441,8 @@ def _build_carousel_caption(parks, date_str, captions):
     footer = []
     footer.append("―――――――――――――――")
     footer.append("📲 毎日20時に翌日の予測を投稿中")
+    footer.append("💬 明日行くなら「シー」か「ランド」をコメントで教えてください")
+    footer.append("📩 グループLINEに送る用の予報です")
     footer.append("👉 @disney_ai_wait をフォロー")
     footer.append("")
     footer.append(' '.join(all_tags))
