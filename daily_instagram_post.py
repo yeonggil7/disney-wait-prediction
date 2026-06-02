@@ -361,6 +361,10 @@ def main():
         )
         backend = _select_backend()
         print(f"\n📡 Instagram バックエンド: {backend}")
+        if args.carousel9 and combined_carousel9 and backend == 'graph':
+            if _already_posted_carousel(date):
+                print("\n✅ 既に投稿済みのため、新規投稿は行いません")
+                return 0
         if not check_connection():
             print("\n❌ Instagram 接続失敗。.env の認証情報を確認してください。")
             return 1
@@ -530,6 +534,48 @@ def _build_carousel_caption(parks, date_str, captions):
     if len(caption) > 2200:
         caption = caption[:2197] + '...'
     return caption
+
+
+def _already_posted_carousel(date_str, lookback=20):
+    """同じ日付のTDRカルーセルが直近に投稿済みならTrueを返す。"""
+    try:
+        import requests
+        from post_via_instagram_graph import (
+            GRAPH_BASE,
+            INSTAGRAM_ACCESS_TOKEN,
+            INSTAGRAM_BUSINESS_ACCOUNT_ID,
+        )
+    except Exception:
+        return False
+
+    if not INSTAGRAM_ACCESS_TOKEN or not INSTAGRAM_BUSINESS_ACCOUNT_ID:
+        return False
+
+    dt = datetime.strptime(date_str, '%Y-%m-%d')
+    day = _weekday_ja(date_str)
+    date_marker = f"{dt.month}月{dt.day}日({day})"
+    title_marker = "東京ディズニーリゾート AI待ち時間予測"
+
+    try:
+        res = requests.get(
+            f"{GRAPH_BASE}/{INSTAGRAM_BUSINESS_ACCOUNT_ID}/media",
+            params={
+                "fields": "id,caption,timestamp",
+                "limit": lookback,
+                "access_token": INSTAGRAM_ACCESS_TOKEN,
+            },
+            timeout=30,
+        )
+        if not res.ok:
+            return False
+        for item in res.json().get("data", []):
+            caption = item.get("caption") or ""
+            if title_marker in caption and date_marker in caption:
+                print(f"⏭️  同日カルーセル投稿済みのためスキップ: {date_marker} media_id={item.get('id')}")
+                return True
+    except Exception as e:
+        print(f"⚠️ 重複投稿チェック失敗（継続）: {e}")
+    return False
 
 
 if __name__ == '__main__':
