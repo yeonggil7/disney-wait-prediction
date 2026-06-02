@@ -12,11 +12,12 @@ on:
         required: false
         default: ''
       mode:
-        description: '投稿モード (default=feed: シー/ランドを別々のフィード投稿として送る)'
+        description: '投稿モード (default=carousel9: ランド+シーのカルーセル投稿)'
         required: false
-        default: 'feed'
+        default: 'carousel9'
         type: choice
         options:
+          - carousel9     # 推奨: ランド+シーを1投稿のカルーセル化
           - feed          # 推奨: シー + ランド 個別投稿 (2投稿/日)
           - carousel      # シー＋ランドを1投稿のカルーセル化 (1投稿/日)
           - auto_alt      # 曜日でシー/ランド交互 (1投稿/日)
@@ -98,8 +99,8 @@ jobs:
           echo "Prediction date: $DATE_ARG"
 
           MODE="${{ github.event.inputs.mode }}"
-          # スケジュール起動時は default=feed (シー/ランド を 個別投稿で送る)
-          MODE="${MODE:-feed}"
+          # スケジュール起動時は default=carousel9 (ランド+シーのカルーセルで送る)
+          MODE="${MODE:-carousel9}"
 
           DRY_RUN="${{ github.event.inputs.dry_run }}"
           DRY_RUN="${DRY_RUN:-false}"
@@ -112,6 +113,9 @@ jobs:
           fi
 
           case "$MODE" in
+            carousel9)
+              ARGS="$ARGS --carousel9"
+              ;;
             feed)
               # シー + ランド を個別の単独投稿として送信 (2投稿/日)
               ;;
@@ -156,5 +160,5 @@ jobs:
         if: always()
         with:
           name: instagram-predictions-${{ github.run_id }}
-          path: predictions_x/ig_*.png
+          path: predictions_x/**/*.png
           retention-days: 14

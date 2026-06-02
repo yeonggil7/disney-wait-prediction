@@ -57,6 +57,31 @@ FACEBOOK_APP_SECRET = os.environ.get("FACEBOOK_APP_SECRET", "")
 IMGUR_CLIENT_ID = os.environ.get("IMGUR_CLIENT_ID", "")
 
 
+def _ensure_graph_jpeg(path: str) -> str:
+    """Graph APIに渡す画像をJPEGへ揃える。元画像は変更しない。"""
+    p = Path(path)
+    if p.suffix.lower() in (".jpg", ".jpeg"):
+        return str(p)
+    try:
+        from PIL import Image
+    except ImportError:
+        return str(p)
+
+    img = Image.open(p)
+    if img.mode in ("RGBA", "LA", "P"):
+        bg = Image.new("RGB", img.size, (7, 88, 106))
+        if img.mode == "P":
+            img = img.convert("RGBA")
+        bg.paste(img, mask=img.split()[-1] if img.mode in ("RGBA", "LA") else None)
+        img = bg
+    elif img.mode != "RGB":
+        img = img.convert("RGB")
+
+    out = p.with_suffix(".jpg")
+    img.save(out, "JPEG", quality=95, optimize=True)
+    return str(out)
+
+
 # =============================================================================
 # 画像公開ホスティング
 # =============================================================================
@@ -339,6 +364,7 @@ class InstagramGraphPoster:
         if not self._check_credentials():
             return False
         try:
+            image_path = _ensure_graph_jpeg(image_path)
             self._log(f"📷 フィード写真投稿: {os.path.basename(image_path)}")
             url = self.host.upload(image_path)
             cid = self._create_container(image_url=url, caption=caption)
@@ -368,6 +394,7 @@ class InstagramGraphPoster:
             self._log(f"🎠 カルーセル投稿（{len(image_paths)}枚）")
             child_cids = []
             for path in image_paths:
+                path = _ensure_graph_jpeg(path)
                 self._log(f"   - {os.path.basename(path)}")
                 url = self.host.upload(path)
                 cid = self._create_container(
@@ -448,6 +475,7 @@ class InstagramGraphPoster:
         if not self._check_credentials():
             return False
         try:
+            image_path = _ensure_graph_jpeg(image_path)
             self._log(f"📖 ストーリーズ投稿: {os.path.basename(image_path)}")
             url = self.host.upload(image_path)
             cid = self._create_container(

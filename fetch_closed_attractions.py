@@ -7,11 +7,106 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 import re
+import json
+from pathlib import Path
 
 # ディズニーランド休止情報URL
 TDL_STOP_URL = "https://www.tokyodisneyresort.jp/tdl/monthly/stop.html"
 # ディズニーシー休止情報URL
 TDS_STOP_URL = "https://www.tokyodisneyresort.jp/tds/monthly/stop.html"
+TDL_DAILY_URL = "https://www.tokyodisneyresort.jp/tdl/daily/calendar.html"
+TDS_DAILY_URL = "https://www.tokyodisneyresort.jp/tds/daily/calendar.html"
+
+
+def fetch_daily_closed_attractions(url, park_name="", debug=False):
+    """公式の当日パーク情報ページからアトラクション休止情報を取得"""
+    try:
+        headers = {
+            'User-Agent': (
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            ),
+            'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8',
+        }
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        response.encoding = 'utf-8'
+    except requests.RequestException as e:
+        print(f"⚠️ {park_name} 当日休止情報の取得に失敗: {e}")
+        return []
+
+    soup = BeautifulSoup(response.text, 'html.parser')
+    lines = [line.strip() for line in soup.get_text('\n', strip=True).splitlines() if line.strip()]
+
+    closed = []
+    in_closed_section = False
+    in_attraction_section = False
+
+    for line in lines:
+        if line == '休止情報':
+            in_closed_section = True
+            in_attraction_section = False
+            continue
+
+        if not in_closed_section:
+            continue
+
+        if line in {'今日の待ち時間/施設の運営状況', 'アプリのサービス'}:
+            break
+
+        if line == 'アトラクション':
+            in_attraction_section = True
+            continue
+
+        if not in_attraction_section:
+            continue
+
+        if line == '閉じる':
+            break
+
+        if '休止を予定しているものはありません' in line:
+            break
+
+        if line in {'パレード/ショー', 'キャラクターグリーティング', 'ショップ', 'レストラン', 'サービス施設'}:
+            break
+
+        if line and line not in closed:
+            closed.append(line)
+
+    if debug:
+        print(f"🔍 {park_name} 当日休止情報: {closed}")
+
+    return closed
+
+
+def load_override_closed_attractions(park='sea', target_date=None):
+    """公式取得に失敗した場合の日付別オーバーライドを読む"""
+    if target_date is None:
+        target_date = datetime.now().strftime('%Y-%m-%d')
+    elif isinstance(target_date, datetime):
+        target_date = target_date.strftime('%Y-%m-%d')
+
+    park_key = 'tds' if park == 'sea' else 'tdl'
+    candidates = [
+        Path('chatbot/data/attraction_status_overrides.json'),
+        Path('data/official_attraction_status_overrides.json'),
+    ]
+
+    for path in candidates:
+        if not path.exists():
+            continue
+        try:
+            with path.open(encoding='utf-8') as f:
+                data = json.load(f)
+            day = data.get(str(target_date), {})
+            values = day.get(park_key)
+            if values is not None:
+                print(f"🚧 公式休止情報オーバーライド使用: {path} {target_date} {park_key}")
+                return values
+        except Exception as e:
+            print(f"⚠️ 休止情報オーバーライド読み込み失敗: {path}: {e}")
+
+    return None
 
 
 def fetch_closed_attractions(url, park_name="", target_date=None, debug=False):
@@ -127,11 +222,23 @@ def fetch_closed_attractions(url, park_name="", target_date=None, debug=False):
 
 def get_closed_attractions_land(target_date=None):
     """ディズニーランドの休止中アトラクションを取得"""
+    daily_closed = fetch_daily_closed_attractions(TDL_DAILY_URL, "ディズニーランド")
+    if daily_closed:
+        return daily_closed
+    override = load_override_closed_attractions('land', target_date)
+    if override is not None:
+        return override
     return fetch_closed_attractions(TDL_STOP_URL, "ディズニーランド", target_date)
 
 
 def get_closed_attractions_sea(target_date=None):
     """ディズニーシーの休止中アトラクションを取得"""
+    daily_closed = fetch_daily_closed_attractions(TDS_DAILY_URL, "ディズニーシー")
+    if daily_closed:
+        return daily_closed
+    override = load_override_closed_attractions('sea', target_date)
+    if override is not None:
+        return override
     return fetch_closed_attractions(TDS_STOP_URL, "ディズニーシー", target_date)
 
 
@@ -162,6 +269,7 @@ def normalize_attraction_name(name, attraction_list):
         'タワー・オブ・テラー': 'タワーオブテラー',
         'センター・オブ・ジ・アース': 'センターオブジアース',
         'インディ・ジョーンズ®・アドベンチャー：クリスタルスカルの魔宮': 'インディージョーンズクリスタルスカルの謎',
+        'インディ・ジョーンズ・アドベンチャー：クリスタルスカルの魔宮': 'インディージョーンズクリスタルスカルの謎',
         'レイジングスピリッツ': 'レイジングスピリッツ',
         '海底2万マイル': '海底二万マイル',
         'ニモ&フレンズ・シーライダー': 'ニモandフレンズシーライダー',
@@ -187,11 +295,13 @@ def normalize_attraction_name(name, attraction_list):
         'プーさんのハニーハント': 'プーさんのハニーハント',
         'バズ・ライトイヤーのアストロブラスター': 'バズ・ライトイヤーのアストロブラスター',
         'モンスターズ・インク"ライド＆ゴーシーク！"': 'モンスターズ・インク"ライド＆ゴーシーク！"',
+        'モンスターズ・インク“ライド＆ゴーシーク！”': 'モンスターズ・インク',
         'ホーンテッドマンション': 'ホーンテッドマンション',
         'カリブの海賊': 'カリブの海賊',
         'ピーターパン空の旅': 'ピーターパン空の旅',
         'イッツ・ア・スモールワールド': 'イッツ・ア・スモールワールド',
         '美女と野獣"魔法のものがたり"': '美女と野獣"魔法のものがたり"',
+        '美女と野獣“魔法のものがたり”': '美女と野獣の物語',
         'ベイマックスのハッピーライド': 'ベイマックスのハッピーライド',
         'スター・ツアーズ:ザ・アドベンチャーズ・コンティニュー': 'スター・ツアーズ',
         'ジャングルクルーズ：ワイルドライフ・エクスペディション': 'ジャングルクルーズ',
@@ -200,6 +310,7 @@ def normalize_attraction_name(name, attraction_list):
         'ミッキーのフィルハーマジック': 'ミッキーのフィルハーマジック',
         'ロジャーラビットのカートゥーンスピン': 'ロジャーラビットのカートゥーンスピン',
         '蒸気船マークトウェイン号': '蒸気船マークトウェイン号',
+        'ミッキーの家とミート・ミッキー': 'ミート・ミッキー',
     }
     
     # マッピング辞書で検索
@@ -223,7 +334,7 @@ def normalize_attraction_name(name, attraction_list):
     return None
 
 
-def get_matched_closed_attractions(park='sea', attraction_list=None):
+def get_matched_closed_attractions(park='sea', attraction_list=None, target_date=None):
     """
     休止中アトラクションを取得し、予測システムの名前にマッチさせる
     
@@ -235,9 +346,9 @@ def get_matched_closed_attractions(park='sea', attraction_list=None):
         list: マッチした休止中アトラクション名のリスト
     """
     if park == 'sea':
-        raw_closed = get_closed_attractions_sea()
+        raw_closed = get_closed_attractions_sea(target_date)
     else:
-        raw_closed = get_closed_attractions_land()
+        raw_closed = get_closed_attractions_land(target_date)
     
     if not attraction_list:
         return raw_closed
@@ -306,4 +417,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

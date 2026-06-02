@@ -11,6 +11,8 @@ Instagram自動投稿スクリプト
   python daily_instagram_post.py --post                  # 翌日分を投稿
   python daily_instagram_post.py --date 2026-04-20 --post
   python daily_instagram_post.py --post --carousel       # シー+ランドを1投稿のカルーセルに
+  python daily_instagram_post.py --post --carousel9             # ランド+シーのカルーセル
+  python daily_instagram_post.py --post --carousel9 --sea-only  # シーのみ9枚構成カルーセル
   python daily_instagram_post.py --post --story          # ストーリーズも投稿
   python daily_instagram_post.py --post --sea-only
 """
@@ -71,6 +73,32 @@ def _weekday_ja(date_str):
     return ['月', '火', '水', '木', '金', '土', '日'][dt.weekday()]
 
 
+def _get_target_closures(park, date_str, targets):
+    """固定休止情報と公式当日休止情報を統合して返す"""
+    if park == 'sea':
+        legacy = list(get_sea_closures(date_str).keys())
+    else:
+        legacy = list(get_land_closures(date_str).keys())
+
+    try:
+        from fetch_closed_attractions import get_matched_closed_attractions
+        official = get_matched_closed_attractions(
+            park=park,
+            attraction_list=targets,
+            target_date=date_str,
+        )
+    except Exception:
+        official = []
+
+    seen = set()
+    closures = []
+    for name in legacy + list(official or []):
+        if name in targets and name not in seen:
+            seen.add(name)
+            closures.append(name)
+    return closures
+
+
 def _build_caption(park, date_str, insights=None):
     """Instagram キャプションを生成（〜2200文字制限）"""
     dt = datetime.strptime(date_str, '%Y-%m-%d')
@@ -79,13 +107,15 @@ def _build_caption(park, date_str, insights=None):
     if park == 'sea':
         emoji = '🌊'
         name = 'ディズニーシー'
-        closures = get_sea_closures(date_str)
+        targets = SEA_TARGET_ATTRACTIONS
+        closures = _get_target_closures(park, date_str, targets)
         display_names = SEA_DISPLAY_NAMES
         hashtags = SEA_HASHTAGS
     else:
         emoji = '🏰'
         name = 'ディズニーランド'
-        closures = get_land_closures(date_str)
+        targets = LAND_TARGET_ATTRACTIONS
+        closures = _get_target_closures(park, date_str, targets)
         display_names = LAND_DISPLAY_NAMES
         hashtags = LAND_HASHTAGS
 
@@ -156,45 +186,19 @@ def _build_caption(park, date_str, insights=None):
 # ---------------------------------------------------------------------------
 def _get_insights(date_str, park):
     try:
-        if park == 'sea':
-            from disneysea_wait_time_predictor_v3 import DisneySeaWaitTimePredictorV3
-            predictor = DisneySeaWaitTimePredictorV3()
-            targets = SEA_TARGET_ATTRACTIONS
-            display = SEA_DISPLAY_NAMES
-            closures = get_sea_closures(date_str)
-        else:
-            from disneyland_wait_time_predictor_v3 import DisneyLandWaitTimePredictorV3
-            predictor = DisneyLandWaitTimePredictorV3()
-            targets = LAND_TARGET_ATTRACTIONS
-            display = LAND_DISPLAY_NAMES
-            closures = get_land_closures(date_str)
+        from generate_instagram_carousel9 import _prepare, _top_rank
 
-        if not predictor.load_models():
+        _pivot, _closures, _predictions, valid, stats, _closed, _short_map = _prepare(date_str, park)
+        if valid is None or valid.empty:
             return None
 
-        attractions = [a for a in targets if a not in closures]
-        time_slots = [f"{h:02d}:{m:02d}" for h in range(9, 21) for m in (0, 30)]
-        predictions = predictor.predict(date=date_str, time_slots=time_slots,
-                                        attractions=attractions)
-        if predictions is None:
-            return None
+        rank = _top_rank(valid, 10)
+        attr_max_list = [(row.short_name, int(row.max_round))
+                         for row in rank.itertuples(index=False)]
 
-        import math
-        max_by_attr = predictions.groupby('attraction_name')['predicted_wait_time'].max()
-        attr_max_list = []
-        for attr in targets:
-            if attr in closures:
-                continue
-            if attr in max_by_attr.index:
-                w = int(math.ceil(max_by_attr[attr] / 10) * 10)
-                attr_max_list.append((display.get(attr, attr), w))
-        attr_max_list.sort(key=lambda x: x[1], reverse=True)
-
-        avg_wait = int(predictions['predicted_wait_time'].mean())
-        avg_by_time = predictions.groupby('time')['predicted_wait_time'].mean()
-        midday = avg_by_time[avg_by_time.index < '20:00']
-        calm_time = midday.idxmin() if not midday.empty else avg_by_time.idxmin()
-        peak_time = avg_by_time.idxmax()
+        avg_wait = int(stats['avg_wait'])
+        calm_time = stats['calm_time']
+        peak_time = stats['peak_time']
 
         if avg_wait >= 60:
             cong, emj = '激混み', '🔴'
@@ -232,6 +236,7 @@ def main():
   python daily_instagram_post.py --dry-run
   python daily_instagram_post.py --date 2026-04-20 --post
   python daily_instagram_post.py --post --sea-only
+  python daily_instagram_post.py --post --carousel9
   python daily_instagram_post.py --post --carousel
   python daily_instagram_post.py --post --story
         """
@@ -244,6 +249,8 @@ def main():
     parser.add_argument('--land-only', action='store_true', help='ランドのみ')
     parser.add_argument('--carousel', action='store_true',
                         help='シー+ランドを1つのカルーセル投稿にまとめる')
+    parser.add_argument('--carousel9', action='store_true',
+                        help='参考投稿風の9枚構成カルーセルを生成/投稿')
     parser.add_argument('--hook', choices=['off', 'auto', 'V1_curiosity',
                                             'V2_stat', 'V3_warning', 'V4_cta'],
                         default='auto',
@@ -275,12 +282,30 @@ def main():
     # ---------- 画像生成 ----------
     feed_images = {}
     story_images = {}
+    carousel9_images = {}
+    combined_carousel9 = args.carousel9 and len(parks) > 1
+
+    if combined_carousel9:
+        print("\n🎢 ランド+シー カルーセル画像生成中...")
+        from generate_instagram_carousel9 import generate_combined_carousel9
+        carousel9_images['both'] = generate_combined_carousel9(
+            date, output_dir=output_dir, handle=args.handle
+        )
+        feed_images['both'] = carousel9_images['both'][0] if carousel9_images['both'] else None
 
     for park in parks:
-        print(f"\n{PARK_THEMES[park]['emoji']} {PARK_THEMES[park]['name']} 画像生成中...")
-        feed_images[park] = generate_instagram_image(
-            date, park, layout='feed', output_dir=output_dir, handle=args.handle
-        )
+        if not combined_carousel9:
+            print(f"\n{PARK_THEMES[park]['emoji']} {PARK_THEMES[park]['name']} 画像生成中...")
+        if args.carousel9 and not combined_carousel9:
+            from generate_instagram_carousel9 import generate_carousel9
+            carousel9_images[park] = generate_carousel9(
+                date, park=park, output_dir=output_dir, handle=args.handle
+            )
+            feed_images[park] = carousel9_images[park][0] if carousel9_images[park] else None
+        elif not args.carousel9:
+            feed_images[park] = generate_instagram_image(
+                date, park, layout='feed', output_dir=output_dir, handle=args.handle
+            )
         if args.story:
             story_images[park] = generate_instagram_image(
                 date, park, layout='story', output_dir=output_dir, handle=args.handle
@@ -293,7 +318,22 @@ def main():
         captions[park] = _build_caption(park, date, insights)
 
     # ---------- 表示 ----------
+    if combined_carousel9:
+        combo_caption = _build_carousel_caption(parks, date, captions)
+        print("\n" + "=" * 60)
+        print("🎢 【ランド+シー】カルーセル:")
+        print("-" * 60)
+        print(combo_caption)
+        print("-" * 60)
+        print(f"📏 文字数: {len(combo_caption)}/2200")
+        print(f"🖼️  画像: {feed_images.get('both')}")
+        print(f"🎠 カルーセル: {len(carousel9_images.get('both') or [])}枚")
+        for p in carousel9_images.get('both') or []:
+            print(f"   - {p}")
+
     for park in parks:
+        if combined_carousel9:
+            continue
         cap = captions[park]
         img = feed_images.get(park)
         print("\n" + "=" * 60)
@@ -304,6 +344,10 @@ def main():
         print(f"📏 文字数: {len(cap)}/2200")
         if img:
             print(f"🖼️  画像: {img}")
+        if args.carousel9 and carousel9_images.get(park):
+            print(f"🎠 9枚カルーセル: {len(carousel9_images[park])}枚")
+            for p in carousel9_images[park]:
+                print(f"   - {p}")
         if args.story and story_images.get(park):
             print(f"📖 ストーリーズ: {story_images[park]}")
 
@@ -324,7 +368,39 @@ def main():
 
         posted = 0
 
-        if args.carousel and len(parks) > 1:
+        if args.carousel9:
+            if combined_carousel9:
+                images = carousel9_images.get('both') or []
+                combo_caption = _build_carousel_caption(parks, date, captions)
+                print("\n🎠 ランド+シー カルーセル投稿中...")
+                ok = poster.post_carousel(images, combo_caption, extra={
+                    "carousel": True,
+                    "n_slides": len(images),
+                    "format": "carousel9",
+                    "target_date": date,
+                    "park": "both",
+                }) if 'extra' in poster.post_carousel.__code__.co_varnames \
+                    else poster.post_carousel(images, combo_caption)
+                if ok:
+                    posted += 1
+            else:
+                for park in parks:
+                    images = carousel9_images.get(park) or []
+                    if not images:
+                        continue
+                    print(f"\n🎠 {PARK_THEMES[park]['name']} 9枚カルーセル投稿中...")
+                    ok = poster.post_carousel(images, captions[park], extra={
+                        "carousel": True,
+                        "n_slides": len(images),
+                        "format": "carousel9",
+                        "target_date": date,
+                        "park": park,
+                    }) if 'extra' in poster.post_carousel.__code__.co_varnames \
+                        else poster.post_carousel(images, captions[park])
+                    if ok:
+                        posted += 1
+                    time.sleep(15)
+        elif args.carousel and len(parks) > 1:
             # シー+ランドを1投稿に
             images = [feed_images[p] for p in parks if feed_images.get(p)]
             hook_variant = None
@@ -398,7 +474,10 @@ def main():
     print("\n📁 生成ファイル:")
     for park, img in feed_images.items():
         if img:
-            print(f"   {PARK_THEMES[park]['emoji']} {PARK_THEMES[park]['name']} (フィード): {img}")
+            if park == 'both':
+                print(f"   🎢 ランド+シー (カルーセル表紙): {img}")
+            else:
+                print(f"   {PARK_THEMES[park]['emoji']} {PARK_THEMES[park]['name']} (フィード): {img}")
     for park, img in story_images.items():
         if img:
             print(f"   📖 {PARK_THEMES[park]['name']} (ストーリーズ): {img}")
